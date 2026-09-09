@@ -36,10 +36,10 @@ typedef struct s_request
 
 typedef struct s_heap
 {
-    t_request *items;
-    int capacity;
-    int size;
-    int policy;
+    t_request *items; //array of request
+    int capacity; // how much it takes
+    int size; // its size
+    int policy; //fifo EDF
 
 } t_heap;
 
@@ -50,7 +50,7 @@ typedef struct s_dongle
     pthread_cond_t cond;
     int taken;
     long available_at;
-    t_heap queue;
+    t_heap queue; //priorty heap
 
 } t_dongle;
 
@@ -95,6 +95,20 @@ int my_atoi(const char *str);
 void cleanup(t_data *data);
 int init_data(t_data *data, int ac, char **av);
 void print_status(t_coder *coder, const char *msg);
+int is_stopped(t_data *data);
+void heap_push(t_heap *heap, t_request request);
+int  top_request(t_heap *heap);
+void heap_pop_first(t_heap *heap);
+void remove_request(t_heap *heap, int id);
+void *coder_routine(void *arg);
+
+int take_dongles(t_coder *coder);
+void    realease_dongles(t_coder *coder);
+void *monitor(void *arg);
+
+
+
+
 
 
 

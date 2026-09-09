@@ -12,6 +12,30 @@ long get_time_ms(void)
 
 // we need a function that sleeps for an amount time 
 // for comiling for debuging for ...
+//why noy sleep nn cause 
+
+void sleep_for_ms(long mss, t_data *data)
+{
+    long start;
+    start = get_time_ms();
+    while(!is_stopped(data))
+    {
+        if (get_time_ms - start >= mss)
+            break;
+        usleep(250);
+    }
+}
+
+// we need a function that checks if the simulation stopped
+
+int is_stopped(t_data *data)
+{
+    int res;
+    pthread_mutex_lock(&data->state_mutex)
+    res = data -> stopped;
+    pthread_mutex_unlock(&data->state_mutex)
+    return res;
+}
 
 
 
