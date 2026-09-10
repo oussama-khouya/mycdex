@@ -14,13 +14,13 @@ static int all_finished_compiling(t_data *data)
     i = 0;
     while(i < data -> coders_count)
     {
-        pthread_mutex_lock(&data->mutex);
+        pthread_mutex_lock(&data->state_mutex);
         if (data->coders[i].compile_count < data->required)
         {
-            pthread_mutex_unlock(&data->mutex);
+            pthread_mutex_unlock(&data->state_mutex);
             return (0);
         }
-        pthread_mutex_unlock(&data->mutex);
+        pthread_mutex_unlock(&data->state_mutex);
         i++;
 
     }
@@ -43,23 +43,23 @@ static void wake_sleep_coders(t_data *data)
 }
 
 
-static int is_burnout(t_coder *data)
+static int is_burnout(t_data *data)
 {
     int i = 0;
     while(i < data->coders_count)
     {
         pthread_mutex_lock(&data->state_mutex);
         //if the coder is burnedout
-        if(get_time_ms() - data->last_compile > data->burnout)
+        if(get_time_ms() - data->coders[i].last_compile > data->burnout)
         {
             data -> stopped = 1;
-            pthread_metux_unlock(&data->state_mutex);
+            pthread_mutex_unlock(&data->state_mutex);
             pthread_mutex_lock(&data->print_mutex);
             printf("%ld %d burned out\n", get_time_ms() - data->start_time, data->coders[i].id);
             pthread_mutex_unlock(&data->print_mutex);
             //wake up the sleep coders
             wake_sleep_coders(data);
-            return (1)
+            return (1);
 
         }
         pthread_mutex_unlock(&data->state_mutex);
@@ -79,11 +79,11 @@ void *monitor(void *arg)
     {
         if(is_burnout(data))
             break;
-        if(all_finished_compiling(data))
+        if(data->required >= 0 && all_finished_compiling(data))
         {
             pthread_mutex_lock(&data->state_mutex);
             data -> stopped = 1;
-            pthread_metux_unlock(&data->state_mutex);
+            pthread_mutex_unlock(&data->state_mutex);
 
             //NOW AGAIN WAKE THE SLEEP CODERS
             wake_sleep_coders(data);

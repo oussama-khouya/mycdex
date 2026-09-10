@@ -9,12 +9,13 @@ static int higher_by_policies(t_request request1, t_request parent, int policy)
             return (request1.arrival < parent.arrival);
         return (request1.id < parent.id);
     }
-    else:
-        if(request1.burnout != parent.burnout)
-            return(request1.burnout < parent.burnout);
+    else
+    {
+        if(request1.deadline != parent.deadline)
+            return(request1.deadline < parent.deadline);
         //last req big id first 
         return (request1.id > parent.id);
-
+    }
 
 }
 
@@ -22,7 +23,7 @@ static int higher_by_policies(t_request request1, t_request parent, int policy)
 static void swap(t_request *a, t_request *b)
 {
     t_request tmp;
-    *a = tmp;
+    tmp = *a;
     *a = *b;
     *b = tmp;
 }
@@ -32,7 +33,7 @@ static void swap(t_request *a, t_request *b)
 static void up(t_heap *heap, int req_po)
 {
     int parent_idx;
-    int i = 0;
+    int i = req_po;
     while (i > 0)
     {
 
@@ -61,15 +62,15 @@ static void down(t_heap *heap, int req_po)
         //now we want to compare the 3 request and see who is the best to swap it 
         //consider i is the best
         best = i;
-        if (left < heap -> size && higher_by_policies(heap->items[left], heap->items[best]))
+        if (left < heap -> size && higher_by_policies(heap->items[left], heap->items[best], heap->policy))
             best = left;
-        if (right < heap -> size && higher_by_policies(heap->items[right], heap->items[best]))
+        if (right < heap -> size && higher_by_policies(heap->items[right], heap->items[best], heap->policy))
             best = right;
         //if none and that req is higher than both of its childern 
-        if (best = i)
+        if (best == i)
             break;
         swap(&heap->items[i], &heap->items[best]);
-        i = best;
+        req_po = best;
 
     }
 }
@@ -84,6 +85,7 @@ void  heap_push(t_heap *heap, t_request request)
     while (i < heap -> size)
     {
         if(heap -> items[i].id == request.id)
+        {
             heap -> items[i] = request;
             //but we need to reorder it for prirot reasons
             // a function that comapre with parents and takes u up 
@@ -92,6 +94,8 @@ void  heap_push(t_heap *heap, t_request request)
 
             // a function that campares wih childers and takes u down
             down(heap, i);
+            return;
+        }
         i++;
     }
     //if it was new and never in the heap
@@ -100,14 +104,16 @@ void  heap_push(t_heap *heap, t_request request)
         return;
     //then put in the end 
     heap -> items[heap -> size] = request;
-    up(heap, heap->size);
     heap -> size ++;
+    up(heap, heap->size - 1);
 
 }
 //return the id of the best request [0]
 int  top_request(t_heap *heap)
 {
     int id;
+    if (heap->size <= 0)
+        return (-1);
     id = heap->items[0].id;
     return (id);
 }
@@ -115,10 +121,13 @@ int  top_request(t_heap *heap)
 //remove the first request
 void heap_pop_first(t_heap *heap)
 {
+    if (heap->size <= 0)
+        return;
     //repace the first with the last 
     heap->items[0] = heap->items[(heap->size) - 1];
     heap->size--;
-    down(heap, 0);
+    if (heap->size > 0)
+        down(heap, 0);
 }
 
 // remove a request by its id
@@ -133,8 +142,11 @@ void remove_request(t_heap *heap, int id)
             //replace with the last one
             heap->items[i] = heap->items[heap->size - 1];
             heap->size--;
-            down(heap, i);
-			up(heap, i);
+            if (i < heap->size)
+            {
+                down(heap, i);
+                up(heap, i);
+            }
 			return ;
 
         }

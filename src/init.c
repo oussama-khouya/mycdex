@@ -14,7 +14,7 @@ static int parse_args(t_data *data, int ac, char **av)
 	data->required = my_atoi(av[6]);
 	data->cooldown = my_atoi(av[7]);
 
-    if (data->coders_count <= 0 || data->burnout < 0
+    if (data->coders_count <= 0 || data->burnout <= 0
 		|| data->compile_time < 0 || data->debug_time < 0
 		|| data->refactor_time < 0 || data->required < 0
 		|| data->cooldown < 0)
@@ -24,7 +24,7 @@ static int parse_args(t_data *data, int ac, char **av)
     if (strcmp(av[8] , "fifo") == 0)
         data -> policy = FIFO;
     else if (strcmp(av[8], "edf") == 0)
-        data -> policy = "EDF";
+        data -> policy = EDF;
     else
         return (0);
 
@@ -49,9 +49,9 @@ static void init_don_code(t_data *data)
         data -> dongles[i].taken = 0;
         data -> dongles[i].available_at = 0;
         data -> dongles[i].queue.size = 0;
-        data -> dongles[i].queue.capacity = 4;
+        data -> dongles[i].queue.capacity = data->coders_count + 4;
         data -> dongles[i].queue.policy = data->policy;
-        data -> dongles[i].queue.items = malloc (sizeof(t_request) * 4);
+        data -> dongles[i].queue.items = malloc (sizeof(t_request) * (data->coders_count + 4));
         // coder shit
 
         data -> coders[i].id = i + 1;
@@ -72,7 +72,7 @@ int init_data(t_data *data, int ac, char **av)
     if (!parse_args(data, ac, av))
         return (0);
     //last init
-    data->start_time = get_time();
+    data->start_time = get_time_ms();
     data ->stopped = 0;
     pthread_mutex_init(&data->print_mutex, NULL);
 	pthread_mutex_init(&data->state_mutex, NULL);

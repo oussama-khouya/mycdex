@@ -20,7 +20,7 @@ void sleep_for_ms(long mss, t_data *data)
     start = get_time_ms();
     while(!is_stopped(data))
     {
-        if (get_time_ms - start >= mss)
+        if (get_time_ms() - start >= mss)
             break;
         usleep(250);
     }
@@ -31,9 +31,9 @@ void sleep_for_ms(long mss, t_data *data)
 int is_stopped(t_data *data)
 {
     int res;
-    pthread_mutex_lock(&data->state_mutex)
+    pthread_mutex_lock(&data->state_mutex);
     res = data -> stopped;
-    pthread_mutex_unlock(&data->state_mutex)
+    pthread_mutex_unlock(&data->state_mutex);
     return res;
 }
 
@@ -51,7 +51,8 @@ int my_atoi(const char *str)
     int i ;
 
     i = 0;
-    while (str[i] == ' ' || str[i] >= 9 && str[i] <= 13)
+    res = 0;
+    while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
         i++;
     
     if (str[i] == '+')
@@ -68,6 +69,7 @@ int my_atoi(const char *str)
         res = res * 10 + (str[i] - '0');
         if (res > 2147483647)
 			return (-1);
+        i++;
 
     }
     return ((int)res);
@@ -81,12 +83,14 @@ void print_status(t_coder *coder, const char *msg)
     t_data *data = coder -> data;
     // u want to print lock the print metux
     pthread_mutex_lock(&data -> print_mutex);
+    pthread_mutex_lock(&data -> state_mutex);
 
-    while(!data -> stopped)
+    if(!data -> stopped)
     {
         // we need a function that give us the exact time with ms
         timestaps = get_time_ms() - data -> start_time;
         printf("%ld %d %s\n", timestaps, coder -> id, msg);
     }
-    pthread_metux_unlock(&data -> print_mutex);
+    pthread_mutex_unlock(&data -> state_mutex);
+    pthread_mutex_unlock(&data -> print_mutex);
 }

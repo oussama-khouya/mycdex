@@ -6,6 +6,10 @@
 #include "stdlib.h"
 #include "pthread.h"
 #include <sys/time.h>
+#include <string.h>
+
+// Forward declaration of shared data struct
+typedef struct s_data t_data;
 
 // coder struct
 typedef struct s_coder
@@ -82,12 +86,6 @@ typedef struct s_data
     t_coder *coders;
     pthread_t monitor;
 
-
-
-
-
-    
-
 } t_data;
 
 // functions 
@@ -106,11 +104,7 @@ int take_dongles(t_coder *coder);
 void    realease_dongles(t_coder *coder);
 void *monitor(void *arg);
 
-
-
-
-
-
-
+long get_time_ms(void);
+void sleep_for_ms(long mss, t_data *data);
 
 #endif

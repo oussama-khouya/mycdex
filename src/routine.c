@@ -6,7 +6,7 @@ static void compile(t_coder *coder)
 {
     t_data *data = coder -> data;
     //it print status
-    print_status(coder, "is_compiling");
+    print_status(coder, "is compiling");
     //it sleeps for the compiling time
     sleep_for_ms(data -> compile_time, data);
     pthread_mutex_lock(&data -> state_mutex);
@@ -19,8 +19,8 @@ static void compile(t_coder *coder)
 
 static void debug(t_coder *coder)
 {
-    data *data = coder -> data;
-    print_status(coder, "is_debuging");
+    t_data *data = coder -> data;
+    print_status(coder, "is debugging");
     sleep_for_ms(data -> debug_time, data);
 
 }
@@ -28,8 +28,8 @@ static void debug(t_coder *coder)
 //refactor
 static void refactor(t_coder *coder)
 {
-    data *data = coder -> data;
-    print_status(coder, "is_refactoring");
+    t_data *data = coder -> data;
+    print_status(coder, "is refactoring");
     sleep_for_ms(data -> refactor_time, data);
 }
 
@@ -43,21 +43,22 @@ void *coder_routine(void *arg)
     while(!is_stopped(coder -> data))
     {
         //the coder takes two dongles
-        if(!take_dongles(coder));
+        if(!take_dongles(coder))
             break;
         //update last_compile time
-        pthread_mutex_lock(coder->data->state_mutex);
-        coder->last_compile = get_time_ms;
+        pthread_mutex_lock(&coder->data->state_mutex);
+        coder->last_compile = get_time_ms();
+        pthread_mutex_unlock(&coder->data->state_mutex);
         //compile
         compile(coder);
         //realease the dongles
         realease_dongles(coder);
         //check if stopped
         
-        if (stopped(coder->data))
+        if (is_stopped(coder->data))
 			break ;
 		debug(coder);
-		if (stopped(coder->data))
+		if (is_stopped(coder->data))
 			break ;
 		refactor(coder);
     }
