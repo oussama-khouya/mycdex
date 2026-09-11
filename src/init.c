@@ -49,9 +49,9 @@ static void init_don_code(t_data *data)
         data -> dongles[i].taken = 0;
         data -> dongles[i].available_at = 0;
         data -> dongles[i].queue.size = 0;
-        data -> dongles[i].queue.capacity = data->coders_count + 4;
+        data -> dongles[i].queue.capacity = 2;
         data -> dongles[i].queue.policy = data->policy;
-        data -> dongles[i].queue.items = malloc (sizeof(t_request) * (data->coders_count + 4));
+        data -> dongles[i].queue.items = malloc (sizeof(t_request) * 2);
         // coder shit
 
         data -> coders[i].id = i + 1;

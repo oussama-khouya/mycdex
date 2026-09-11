@@ -84,7 +84,7 @@ typedef struct s_data
 
     t_dongle *dongles;
     t_coder *coders;
-    pthread_t monitor;
+    pthread_t monitor_thread;
 
 } t_data;
 

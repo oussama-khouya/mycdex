@@ -4,7 +4,9 @@
 //compile
 static void compile(t_coder *coder)
 {
-    t_data *data = coder -> data;
+    t_data *data;
+
+    data = coder -> data;
     //it print status
     print_status(coder, "is compiling");
     //it sleeps for the compiling time

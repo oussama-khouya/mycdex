@@ -29,21 +29,21 @@ static int take_dongle(t_coder *coder, int dongle_id)
     while(!is_stopped(data))
     {
            //check if its not taken and aslo if that request is top request 
-        if(!(d->taken) && d->queue.size > 0 && (top_request(&d->queue) == coder->id))
+        if(!(d->taken) && (top_request(&d->queue) == coder->id))
         {
             //check cooldown peroid
             if (get_time_ms() >= d->available_at)
             {
                 d->taken = 1;
-                //take request of the dong heap
+                //take request out of the dongle s heap
                 heap_pop_first(&d->queue);
                 pthread_mutex_unlock(&d->mutex);
                 print_status(coder, "has taken a dongle");
                 return (1);
             }
-            //if still not avaible 
-            ts.tv_sec = d->available_at / 1000L;
-            ts.tv_nsec = (d->available_at % 1000L) * 1000000L;
+            //if still not avaible ba9i sekhouna
+            ts.tv_sec = d->available_at / 1000;
+            ts.tv_nsec = (d->available_at % 1000) * 1000000;
             pthread_cond_timedwait(&d->cond, &d->mutex, &ts);
 
         }
@@ -77,32 +77,31 @@ int take_dongles(t_coder *coder)
         first = second;
         second = tmp;
     }
+
     if(!take_dongle(coder, first))
         return(0);
+
     //if there is only one dongle one coder and already i took one
     // so just wait till summulation and give up
     if(first == second)
     {
         while(!is_stopped(coder->data))
             sleep_for_ms(1, coder->data);
-        pthread_mutex_lock(&coder->data->dongles[first].mutex);
-        coder->data->dongles[first].taken = 0;
-        pthread_cond_broadcast(&coder->data->dongles[first].cond);
-        pthread_mutex_unlock(&coder->data->dongles[first].mutex);
-        return (0);
+
+        // the sum is realase the dongle 
+        // relase first dongle 
+        realease_dongles(coder);
+        return(0);
     }
+
     if(!take_dongle(coder, second))
-    {    
-        pthread_mutex_lock(&coder->data->dongles[first].mutex);
-        coder->data->dongles[first].taken = 0;
-        coder->data->dongles[first].available_at = get_time_ms() + coder->data->cooldown;
-        pthread_cond_broadcast(&coder->data->dongles[first].cond);
-        pthread_mutex_unlock(&coder->data->dongles[first].mutex);
-        return (0);
+    {
+        // release first dongle 
+        realease_dongles(coder);
+        return(0);
     }
-    return (1);
 
-
+    return(1);
 }
 
 void    realease_dongles(t_coder *coder)
