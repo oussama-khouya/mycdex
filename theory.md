@@ -18,25 +18,221 @@ This document is your complete, in-depth theoretical and technical defense refer
 
 ---
 
-# 1. The Codexion Problem & How My Code Solves It
+# 1. The Codexion Problem: Theoretical Foundations & Visual Models
 
-Codexion is an industrial extension of Edsger Dijkstra's classic **Dining Philosophers Problem** (1965):
-- Instead of **Philosophers**, we have **Coders** ($N$ threads).
-- Instead of **Spaghetti/Rice**, coders perform cycles of:
-  $$\text{Compile} \longrightarrow \text{Debug} \longrightarrow \text{Refactor}$$
-- Instead of **Forks**, coders share **Hardware Dongles** ($N$ shared resources).
-- A coder sits in a circular arrangement at a round table:
-  - Coder $i$ has **Left Dongle** $= i$
-  - Coder $i$ has **Right Dongle** $= (i + 1) \pmod N$
-- To compile, a coder **must simultaneously hold both the left and right dongles**.
+## 1.1 The Dining Philosophers Problem: History & Theory
+In 1965, **Edsger W. Dijkstra** formulated an examination problem to illustrate the synchronization challenges of concurrent resource sharing, originally framed with computers competing to access tape drive peripherals. In 1971, **Tony Hoare** refined Dijkstra's problem into the now-famous **Dining Philosophers Problem**:
+* Five philosophers sit around a circular table.
+* Each philosopher spends their life alternating between two states: **Thinking** and **Eating**.
+* In the center of the table lies a bowl of spaghetti.
+* Between each pair of adjacent philosophers lies a single fork (5 philosophers, 5 forks).
+* To eat, a philosopher **requires two forks** (both their left fork and their right fork).
+* When finished eating, they put down both forks and resume thinking.
 
-Below is the complete breakdown of **every specific problem** in this project and **the exact solution** implemented in your code:
+### Why is this problem a cornerstone of Computer Science?
+The Dining Philosophers problem is the quintessential model for:
+1. **Mutual Exclusion**: Shared physical hardware/memory resources cannot be accessed concurrently by adjacent processes without corruption.
+2. **Deadlock**: If all processes simultaneously claim one resource and wait for the second, the system freezes permanently.
+3. **Starvation & Livelock**: An unfair scheduling policy can allow some processes to run indefinitely while starving others to death.
+4. **Concurrency vs Parallelism**: Coordinating multiple autonomous execution flows without centralized global locks.
 
 ---
+
+## 1.2 From Dining Philosophers to Codexion: The Modern Extension
+Codexion elevates Dijkstra's classic thought experiment into a high-concurrency operating system simulation:
+* **Philosophers $\longrightarrow$ Coders** ($N$ independent POSIX threads).
+* **Eating $\longrightarrow$ Compiling** (Requires 2 hardware dongles).
+* **Thinking $\longrightarrow$ Debugging & Refactoring** (Releases dongles and works independently).
+* **Forks $\longrightarrow$ Hardware Dongles** ($N$ shared resources guarded by mutexes and condition variables).
+* **Starvation to Death $\longrightarrow$ Coder Burnout** (If time since last compile exceeds `time_to_burnout`, the coder burns out and dies).
+* **Hardware Cooldown (NEW)**: When released, a dongle enters a mandatory physical cooldown period (`dongle_cooldown`) during which it cannot be acquired by anyone.
+* **Priority Queue Scheduling (NEW)**: Contention for each dongle is arbitrated by a min-heap priority queue supporting **FIFO** (arrival order) and **EDF** (earliest burnout deadline).
+
+---
+
+## 1.3 Visual Diagram: The Circular Table & Resource Sharing
+
+Below is the physical topology for 5 coders and 5 shared hardware dongles:
+
+```
+                            ┌───────────────┐
+                            │    CODER 1    │
+                            │  Left:  D0    │
+                            │  Right: D1    │
+                            └───────┬───────┘
+                                   / \
+                                  /   \
+                        Dongle 0 /     \ Dongle 1
+                                /       \
+                               /         \
+                 ┌────────────┴──┐     ┌──┴────────────┐
+                 │    CODER 5    │     │    CODER 2    │
+                 │  Left:  D4    │     │  Left:  D1    │
+                 │  Right: D0    │     │  Right: D2    │
+                 └──────┬────────┘     └────────┬──────┘
+                         \                     /
+                Dongle 4  \                   /  Dongle 2
+                           \                 /
+                            ┌──┴───────────┴──┐
+                            │    CODER 4      │
+                            │  Left:  D3      │
+                            │  Right: D4      │
+                            └───┬─────────┬───┘
+                                 \       /
+                                  \     /
+                         Dongle 3  \   /
+                                    \ /
+                            ┌────────┴────────┐
+                            │    CODER 3      │
+                            │  Left:  D2      │
+                            │  Right: D3      │
+                            └─────────────────┘
+```
+
+### Dongle Sharing Map:
+* **Dongle 0** is shared between **Coder 1** and **Coder 5**.
+* **Dongle 1** is shared between **Coder 1** and **Coder 2**.
+* **Dongle 2** is shared between **Coder 2** and **Coder 3**.
+* **Dongle 3** is shared between **Coder 3** and **Coder 4**.
+* **Dongle 4** is shared between **Coder 4** and **Coder 5**.
+
+> **Crucial Rule**: Adjacent coders **cannot compile at the same time**. In a 5-coder simulation, at most **2 coders** can compile concurrently ($1 \& 3$, $1 \& 4$, $2 \& 4$, $2 \& 5$, or $3 \& 5$).
+
+---
+
+## 1.4 Visual Diagram: The Coder Lifecycle State Machine
+
+Each coder thread continuously cycles through the following finite state machine:
+
+```
+               ┌──────────────────────────────────────────┐
+               │                                          │
+               ▼                                          │
+    ┌──────────────────────┐                              │
+    │  READY / REFACTORING │                              │
+    └──────────┬───────────┘                              │
+               │ Requests Dongles                         │
+               ▼                                          │
+    ┌──────────────────────┐                              │
+    │   ENQUEUE REQUEST    │ (Pushes request to heap)     │
+    └──────────┬───────────┘                              │
+               │ Waits for Turn + Cooldown                │
+               ▼                                          │
+    ┌──────────────────────┐                              │
+    │   ACQUIRE DONGLES    │ (Acquires min ID, then max)  │
+    └──────────┬───────────┘                              │
+               │                                          │
+               ▼                                          │
+    ┌──────────────────────┐                              │
+    │      COMPILING       │ (sleeps compile_time ms)     │
+    │ (Resets burnout clock│                              │
+    └──────────┬───────────┘                              │
+               │                                          │
+               ▼                                          │
+    ┌──────────────────────┐                              │
+    │   RELEASE DONGLES    │ (Starts Cooldown Window)     │
+    │  (Broadcast Signal)  │                              │
+    └──────────┬───────────┘                              │
+               │                                          │
+               ▼                                          │
+    ┌──────────────────────┐                              │
+    │      DEBUGGING       │ (sleeps debug_time ms)       │
+    └──────────┬───────────┘                              │
+               │                                          │
+               ▼                                          │
+    ┌──────────────────────┐                              │
+    │     REFACTORING      │ (sleeps refactor_time ms)    │
+    └──────────┬───────────┘                              │
+               │                                          │
+               └──────────────────────────────────────────┘
+```
+
+---
+
+## 1.5 Visual Diagram: Dongle Hardware Cooldown Timeline
+
+When a coder releases a dongle, it enters a mandatory hardware cooldown during which no other coder can take it:
+
+```
+Time (ms) ──►
+0ms                  200ms                            600ms
+├──────────────────────┼────────────────────────────────┼──────────────────────►
+│   Coder Compiles     │     HARDWARE COOLDOWN WINDOW   │   Dongle Available   │
+│   (Dongle is TAKEN)  │     (Dongle is UNAVAILABLE)    │   (Next Coder Can    │
+│                      │                                │    Acquire Dongle)   │
+└──────────────────────┴────────────────────────────────┴──────────────────────►
+                       ▲                                ▲
+                  released at:                   available_at:
+                  get_time_ms()              get_time_ms() + cooldown
+```
+
+---
+
+## 1.6 Visual Diagram: Process & Multi-Threaded Memory Architecture
+
+How our application structures memory and thread boundaries within the single OS process:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CODEXION OS PROCESS                               │
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                     VIRTUAL ADDRESS SPACE: HEAP                       │  │
+│  │                                                                       │  │
+│  │  ┌─────────────────────────────────────────────────────────────────┐  │  │
+│  │  │ t_data structure:                                               │  │  │
+│  │  │  - start_time, burnout, compile_time, debug_time, refactor_time │  │  │
+│  │  │  - stopped flag                                                 │  │  │
+│  │  │  - state_mutex (guards stopped, last_compile, compile_count)    │  │  │
+│  │  │  - print_mutex (serializes console printing to stdout)          │  │  │
+│  │  └─────────────────────────────────────────────────────────────────┘  │  │
+│  │                                                                       │  │
+│  │  ┌─────────────────────────────────────────────────────────────────┐  │  │
+│  │  │ t_dongle[N] array:                                              │  │  │
+│  │  │  - id, taken, available_at                                      │  │  │
+│  │  │  - mutex (protects queue and taken state)                       │  │  │
+│  │  │  - cond (wakes waiting threads on release/cooldown/stop)        │  │  │
+│  │  │  - queue: t_heap (min-heap array of size 2, FIFO / EDF)         │  │  │
+│  │  └─────────────────────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────┬───────────────────────────────────┘  │
+│                                      │ Shared Pointers                      │
+│         ┌────────────────────────────┼────────────────────────────┐         │
+│         ▼                            ▼                            ▼         │
+│  ┌──────────────┐             ┌──────────────┐             ┌──────────────┐ │
+│  │ MAIN THREAD  │             │ CODER THREAD │             │   MONITOR    │ │
+│  │ (main.c)     │             │ 1 .. N       │             │ THREAD       │ │
+│  │              │             │ (routine.c)  │             │ (monitor.c)  │ │
+│  │ Stack:       │             │ Stack:       │             │ Stack:       │ │
+│  │ - argc, argv │             │ - coder_id   │             │ - last check │ │
+│  │ - joins all  │             │ - left/right │             │ - usleep(250)│ │
+│  └──────────────┘             └──────────────┘             └──────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 1.7 Every Problem in Codexion & Exactly How My Code Solves It
+
 
 ### Problem 1: Deadlock (Circular Wait)
 - **The Problem**:
   If every coder picks up their left dongle first, all 5 coders simultaneously hold their left dongle. Then, all 5 coders attempt to pick up their right dongle. Because each right dongle is already held by their neighbor, every thread enters an infinite wait state. No coder can compile, and no coder releases their dongle. The simulation **freezes completely forever (Deadlock)**.
+
+#### Visual Diagram: The Circular Wait Deadlock Trap
+```
+   CODER 1  ──[Holds D0, Waits for]──►  CODER 2
+      ▲                                    │
+      │ [Waits for D0]                     │ [Holds D1, Waits for D2]
+      │                                    ▼
+   CODER 5                              CODER 3
+      ▲                                    │
+      │ [Holds D4, Waits for D0]           │ [Holds D2, Waits for D3]
+      │                                    ▼
+      └─────────[Holds D3, Waits for]─── CODER 4
+
+      *** DEADLOCK: EVERY THREAD HOLDS 1 DONGLE AND WAITS FOR THE NEXT! ***
+```
+
 - **The Solution in My Code ([src/dongle.c](file:///Users/okhouya/Documents/mycodex/src/dongle.c#L60-L68))**:
   We eliminate the Circular Wait condition (the 4th Coffman condition) using Dijkstra's **Resource Hierarchy Strategy**. Before acquiring any dongle, every coder sorts its two dongle IDs:
   ```c
@@ -52,6 +248,22 @@ Below is the complete breakdown of **every specific problem** in this project an
   - Coders 1, 2, 3, and 4 acquire: (0 then 1), (1 then 2), (2 then 3), (3 then 4).
   - Coder 5 needs Dongle 4 and Dongle 0. Instead of taking 4 first, Coder 5 is forced to acquire **Dongle 0 FIRST, and Dongle 4 SECOND**.
   - Because Coder 1 and Coder 5 both compete for Dongle 0 as their very first action, one of them wins and the other blocks *before* holding any dongle. A circular dependency cycle is mathematically impossible!
+
+#### Visual Diagram: How Resource Hierarchy Breaks the Cycle
+```
+   CODER 1  ──(Competes for D0 FIRST)──► [ DONGLE 0 ] ◄──(Competes for D0 FIRST)── CODER 5
+                                               │
+                        ┌──────────────────────┴──────────────────────┐
+                        ▼                                             ▼
+                 CODER 1 WINS D0                               CODER 5 BLOCKS
+          (Now holds D0, acquires D1)                     (Holds ZERO dongles! Cannot
+                        │                                  lock D4, so Coder 4 can
+                        ▼                                  freely acquire D3 & D4!)
+          CODER 1 COMPILES & RELEASES D0, D1                          │
+                        │                                             ▼
+                        └───────────────────────────────► CYCLE BROKEN: ZERO DEADLOCK!
+```
+
 
 ---
 
@@ -127,6 +339,42 @@ Below is the complete breakdown of **every specific problem** in this project an
      if (!d->taken && (top_request(&d->queue) == coder->id))
      ```
   4. If another coder is higher in the queue, the thread calls `pthread_cond_wait(&d->cond, &d->mutex)` and waits its turn.
+
+#### Visual Diagram: Priority Queue Min-Heap Arbitration on Dongle
+```
+  CODER A Requests Dongle ──┐
+                            ├────────► [ HEAP_PUSH ]
+  CODER B Requests Dongle ──┘              │
+                                           ▼
+                                 ┌───────────────────┐
+                                 │   d->queue (Heap) │
+                                 │  Root: items[0]   │ <─── TOP PRIORITY REQUEST
+                                 │  Next: items[1]   │ <─── WAITING REQUEST
+                                 └─────────┬─────────┘
+                                           │
+                           Evaluated via: higher(a, b, policy)
+                                           │
+               ┌───────────────────────────┴───────────────────────────┐
+               ▼                                                       ▼
+      [ FIFO Policy ]                                         [ EDF Policy ]
+   - Compares arrival time                                 - Compares deadline
+   - Earliest requester is at root                         - Nearest burnout is at root
+   - Equal arrivals -> Lower ID wins                       - Equal deadlines -> HIGHER ID wins
+               │                                                       │
+               └───────────────────────────┬───────────────────────────┘
+                                           │
+                                           ▼
+                                   [ Dongle Unlocks ]
+                                           │
+                   Is caller at items[0]? ─┼── NO  ──► pthread_cond_wait(&d->cond)
+                                           │
+                                          YES
+                                           │
+                                           ▼
+                                   [ DONGLE GRANTED! ]
+                                   heap_pop_first(&d->queue)
+```
+
 
 ---
 
@@ -340,6 +588,32 @@ If the lock word is already `1` (another thread holds the mutex):
   - If other threads are waiting, it invokes `sys_futex(FUTEX_WAKE)` / `__psynch_mutexdrop`.
   - The kernel wakes up one waiting thread from the wait queue, marks it runnable, and it acquires the lock.
 
+#### Visual Diagram: Mutex Fast Path vs Slow Path (Futex)
+```
+  Calling pthread_mutex_lock(&mutex)
+                 │
+                 ▼
+     [ CPU: Atomic Compare-and-Swap ]
+                 │
+        Is lock == 0 (Free)?
+        /                  \
+      YES                   NO
+      /                      \
+     ▼                        ▼
+ [ FAST PATH ]           [ SLOW PATH ]
+ - Flips 0 -> 1          - Invokes sys_futex(FUTEX_WAIT)
+ - Returns instantly!    - OS kernel deschedules thread
+ - ~15 CPU cycles        - Enqueued in Kernel Sleep Queue
+ - ZERO SYSCALLS!        - Consumes 0% CPU!
+                              │
+                      [ Other thread calls unlock ]
+                              │
+                              ▼
+                         sys_futex(FUTEX_WAKE)
+                         Kernel wakes sleeping thread
+                         Thread re-tries lock and resumes!
+```
+
 ### How Mutexes Solve Real Problems in Our Code:
 
 #### 1. `print_mutex`
@@ -381,6 +655,43 @@ Imagine if `pthread_cond_wait(&cond)` did not take a mutex:
 When another thread signals or broadcasts:
 4. The thread wakes up, and **re-acquires the mutex** before `pthread_cond_wait()` returns to your code!
 
+#### Visual Diagram: The Atomic Cycle of `pthread_cond_wait(&cond, &mutex)`
+```
+                 Thread holds mutex inside critical section
+                                     │
+                                     ▼
+                Calls: pthread_cond_wait(&cond, &mutex)
+                                     │
+         ┌───────────────────────────┴───────────────────────────┐
+         │ ATOMIC KERNEL TRANSACTION                             │
+         │ 1. Adds thread to cond's wait queue                   │
+         │ 2. RELEASES mutex (so others can modify state)        │
+         │ 3. Puts thread to SLEEP (descheduled from CPU)        │
+         └───────────────────────────┬───────────────────────────┘
+                                     │
+                   [ Thread sleeps in kernel: 0% CPU ]
+                                     │
+           Another thread modifies state and signals/broadcasts:
+                  pthread_cond_broadcast(&cond)
+                                     │
+                                     ▼
+                      Thread is woken up by OS kernel
+                                     │
+                                     ▼
+                    [ MUST RE-ACQUIRE MUTEX FIRST! ]
+                                     │
+                     Does another thread hold mutex?
+                     /                             \
+                   YES                              NO
+                   /                                 \
+                  ▼                                   ▼
+          Blocks on mutex                     Acquires mutex
+          (waits in mutex queue)              and returns from wait!
+                                                      │
+                                                      ▼
+                                       Re-evaluates `while (!condition)`
+```
+
 ### Why a `while` loop is MANDATORY (Never use `if`)!
 ```c
 // WRONG:
@@ -404,6 +715,7 @@ ts.tv_nsec = (d->available_at % 1000) * 1000000;
 pthread_cond_timedwait(&d->cond, &d->mutex, &ts);
 ```
 The OS kernel wakes the thread **at the exact absolute nanosecond** that the hardware cooldown expires, or earlier if signaled.
+
 
 ---
 
@@ -438,6 +750,28 @@ These two terms sound similar, but in Computer Science they represent distinct c
   ```
 - **How we prevent it**: Both the read and the write are strictly enclosed within `pthread_mutex_lock(&data->state_mutex)`.
 
+#### Visual Diagram: Hardware-Level Data Race (Memory & Cache Incoherency)
+```
+  [ CPU CORE 1 (Coder Thread) ]                [ CPU CORE 2 (Monitor Thread) ]
+               │                                              │
+        Executes Write:                                Executes Read:
+  coder->last_compile = 5000;                     last = coder->last_compile;
+               │                                              │
+               ▼                                              ▼
+       [ Core 1 L1 Cache ]                            [ Core 2 L1 Cache ]
+   (Cached value = 5000)                          (Stale value = 2000!)
+               │                                              │
+               │ (No Mutex / Memory Barrier!)                 │
+               ▼                                              ▼
+     ======================= SHARED RAM BUS =======================
+            [ Physical RAM: coder->last_compile = ??? ]
+     ==============================================================
+                               ▲
+                               │
+            *** DATA RACE & TORN READ OCCURS! ***
+            Core 2 reads stale 2000 -> thinks coder burned out!
+```
+
 ### B. Race Condition (High-Level Timing/Logic Flaw)
 - **Definition**: A semantic flaw where the correctness of a program's output depends on the execution order, timing, or interleaving of threads.
 - **Key distinction**: A program can be **100% free of data races** (every single variable access has a mutex) and **STILL have a devastating race condition**!
@@ -456,6 +790,28 @@ These two terms sound similar, but in Computer Science they represent distinct c
   }
   ```
 - **How we prevent it**: All check-and-act operations (checking if dongle is taken, checking priority, pushing/popping from the heap, and setting `taken = 1`) occur inside a **single, contiguous critical section** while holding `d->mutex`.
+
+#### Visual Diagram: Check-Then-Act Race Condition Interleaving
+```
+   TIME        THREAD 1 (Coder A)                    THREAD 2 (Coder B)
+    │
+    │   pthread_mutex_lock(&d->mutex);
+    │   Check: if (!d->taken) -> TRUE
+    ▼   pthread_mutex_unlock(&d->mutex);
+                 [ CONTEXT SWITCH ] ────────────────────────┐
+                                                            ▼
+                                                pthread_mutex_lock(&d->mutex);
+                                                Check: if (!d->taken) -> TRUE
+                                                Act:   d->taken = 1; (ACQUIRED!)
+                                                pthread_mutex_unlock(&d->mutex);
+                 [ CONTEXT SWITCH ] ◄───────────────────────┘
+    │   pthread_mutex_lock(&d->mutex);
+    │   Act:   d->taken = 1; (ACQUIRED AGAIN!)
+    ▼   pthread_mutex_unlock(&d->mutex);
+
+    *** RESULT: BOTH THREADS BELIEVE THEY EXCLUSIVELY OWN THE SAME DONGLE! ***
+```
+
 
 ---
 
