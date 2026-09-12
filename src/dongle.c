@@ -33,7 +33,6 @@ static int take_dongle(t_coder *coder, int dongle_id) {
         // take request out of the dongle s heap
         heap_pop_first(&d->queue);
         pthread_mutex_unlock(&d->mutex);
-        print_status(coder, "has taken a dongle");
         return (1);
       }
       // if still not avaible ba9i sekhouna
@@ -73,6 +72,7 @@ int take_dongles(t_coder *coder) {
   // if there is only one dongle one coder and already i took one
   //  so just wait till summulation and give up
   if (first == second) {
+    print_status(coder, "has taken a dongle");
     while (!is_stopped(coder->data))
       sleep_for_ms(1, coder->data);
 
@@ -87,6 +87,9 @@ int take_dongles(t_coder *coder) {
     realease_dongles(coder);
     return (0);
   }
+  // print both
+  print_status(coder, "has taken a dongle");
+  print_status(coder, "has taken a dongle");
 
   return (1);
 }

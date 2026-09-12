@@ -79,7 +79,7 @@ void *monitor(void *arg)
     {
         if(is_burnout(data))
             break;
-        if(data->required >= 0 && all_finished_compiling(data))
+        if(all_finished_compiling(data))
         {
             pthread_mutex_lock(&data->state_mutex);
             data -> stopped = 1;
