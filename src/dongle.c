@@ -59,7 +59,8 @@ int take_dongles(t_coder *coder) {
   first = coder->left;
   second = coder->right;
 
-  // put just in order
+  // put just in order here we have resource hierarchy 
+  // this prevent the deadlockl
   if (first > second) {
     tmp = first;
     first = second;

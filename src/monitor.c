@@ -17,9 +17,11 @@ static int all_finished_compiling(t_data *data)
         pthread_mutex_lock(&data->state_mutex);
         if (data->coders[i].compile_count < data->required)
         {
+            // not finished yet
             pthread_mutex_unlock(&data->state_mutex);
             return (0);
         }
+        // fimished check another one
         pthread_mutex_unlock(&data->state_mutex);
         i++;
 

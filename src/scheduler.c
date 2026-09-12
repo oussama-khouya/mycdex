@@ -26,19 +26,32 @@ static void swap(t_request *a, t_request *b)
 
 void heap_push(t_heap *heap, t_request request)
 {
-	if (heap->size == 0)
-	{
-		heap->items[0] = request;
-		heap->size = 1;
-		return ;
-	}
-	if (heap->size == 1)
-	{
-		heap->items[1] = request;
-		heap->size = 2;
-		if (higher(heap->items[1], heap->items[0], heap->policy))
-			swap(&heap->items[0], &heap->items[1]);
-	}
+    if (heap->size == 0)
+    {
+        heap->items[0] = request;
+        heap->size = 1;
+        return ;
+    }
+    else if (heap->size == 1)
+    {
+        if (heap->items[0].id == request.id)
+        {
+            heap->items[0] = request;
+            return ;
+        }
+
+        heap->items[1] = request;
+        heap->size = 2;
+        if (higher(heap->items[1], heap->items[0], heap->policy))
+            swap(&heap->items[0], &heap->items[1]);
+    }
+    else if (heap->size == 2)
+    {
+        if (heap->items[0].id == request.id)
+            heap->items[0] = request;
+        else if (heap->items[1].id == request.id)
+            heap->items[1] = request;
+    }
 }
 
 int top_request(t_heap *heap)
