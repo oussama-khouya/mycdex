@@ -18,10 +18,9 @@ This document is your complete, in-depth theoretical and technical defense refer
 
 ---
 
-# 1. The Codexion Problem & Architecture
+# 1. The Codexion Problem & How My Code Solves It
 
-### The Real-World Analogy: The Dining Philosophers
-Codexion is an advanced, industrial extension of Edsger Dijkstra's classic **Dining Philosophers Problem** (1965):
+Codexion is an industrial extension of Edsger Dijkstra's classic **Dining Philosophers Problem** (1965):
 - Instead of **Philosophers**, we have **Coders** ($N$ threads).
 - Instead of **Spaghetti/Rice**, coders perform cycles of:
   $$\text{Compile} \longrightarrow \text{Debug} \longrightarrow \text{Refactor}$$
@@ -31,18 +30,155 @@ Codexion is an advanced, industrial extension of Edsger Dijkstra's classic **Din
   - Coder $i$ has **Right Dongle** $= (i + 1) \pmod N$
 - To compile, a coder **must simultaneously hold both the left and right dongles**.
 
-### What makes Codexion much more complex than standard Philosophers?
-Standard Philosophers has no hardware cooldown and no arbitration queues. Codexion introduces two major real-world operating system challenges:
-1. **Hardware Dongle Cooldown (`dongle_cooldown`)**:
-   - When a coder finishes compiling and releases a dongle, the hardware enters a cooldown period.
-   - For `cooldown` milliseconds, **no coder is allowed to acquire that dongle**.
-   - Implemented via absolute time tracking (`available_at = current_time + cooldown`) and timed kernel sleeps (`pthread_cond_timedwait`).
-2. **Priority Queue Arbitration (`fifo` vs `edf`)**:
-   - In simple philosophers, whoever grabs the mutex first gets the fork (uncontrolled contention).
-   - In Codexion, each dongle has its own **hardware queue** (a min-heap priority queue).
-   - When multiple coders compete for the same dongle, the dongle serves requests according to a strict scheduling policy:
-     - **FIFO (First-In, First-Out)**: Served strictly by arrival timestamp (`arrival`).
-     - **EDF (Earliest Deadline First)**: Served strictly by burnout deadline (`last_compile + burnout`).
+Below is the complete breakdown of **every specific problem** in this project and **the exact solution** implemented in your code:
+
+---
+
+### Problem 1: Deadlock (Circular Wait)
+- **The Problem**:
+  If every coder picks up their left dongle first, all 5 coders simultaneously hold their left dongle. Then, all 5 coders attempt to pick up their right dongle. Because each right dongle is already held by their neighbor, every thread enters an infinite wait state. No coder can compile, and no coder releases their dongle. The simulation **freezes completely forever (Deadlock)**.
+- **The Solution in My Code ([src/dongle.c](file:///Users/okhouya/Documents/mycodex/src/dongle.c#L60-L68))**:
+  We eliminate the Circular Wait condition (the 4th Coffman condition) using Dijkstra's **Resource Hierarchy Strategy**. Before acquiring any dongle, every coder sorts its two dongle IDs:
+  ```c
+  first = coder->left;
+  second = coder->right;
+  if (first > second) {
+      tmp = first;
+      first = second;
+      second = tmp;
+  }
+  ```
+  Every coder **always acquires the lower numerical ID first, and the higher numerical ID second**.
+  - Coders 1, 2, 3, and 4 acquire: (0 then 1), (1 then 2), (2 then 3), (3 then 4).
+  - Coder 5 needs Dongle 4 and Dongle 0. Instead of taking 4 first, Coder 5 is forced to acquire **Dongle 0 FIRST, and Dongle 4 SECOND**.
+  - Because Coder 1 and Coder 5 both compete for Dongle 0 as their very first action, one of them wins and the other blocks *before* holding any dongle. A circular dependency cycle is mathematically impossible!
+
+---
+
+### Problem 2: Terminal Output Scrambling (Garbled Logs)
+- **The Problem**:
+  The function `printf()` writes characters to the standard output (`stdout`) stream. When multiple threads call `printf()` at the exact same millisecond, their output characters interleave on the terminal screen, producing corrupted logs like:
+  ```text
+  200 1 200 2 is is dcompebiugggingng
+  ```
+  This immediately fails the evaluation check for clean log formatting.
+- **The Solution in My Code ([src/utils.c](file:///Users/okhouya/Documents/mycodex/src/utils.c#L46-L59))**:
+  We protect all printing inside a dedicated mutex: `print_mutex`.
+  ```c
+  void print_status(t_coder *coder, char *status) {
+      pthread_mutex_lock(&coder->data->print_mutex);
+      if (!coder->data->stopped) {
+          printf("%ld %d %s\n", get_time_ms() - coder->data->start_time, coder->id, status);
+      }
+      pthread_mutex_unlock(&coder->data->print_mutex);
+  }
+  ```
+  Every log line is guaranteed to be printed atomically from start to finish without interruption. Furthermore, it checks `!coder->data->stopped` so that **no log can ever appear after a coder burns out or the simulation ends**.
+
+---
+
+### Problem 3: Data Races on Shared State Variables
+- **The Problem**:
+  The coder thread writes to `coder->last_compile` when it starts compiling, while the monitor thread simultaneously reads `coder->last_compile` to check if the coder burned out. If two threads read and write the same 64-bit integer concurrently without synchronization, modern CPU architectures cause **torn reads** (reading half-written memory), cache incoherency, and compiler register caching, causing the monitor to miss deaths or trigger false burnouts.
+- **The Solution in My Code ([src/routine.c](file:///Users/okhouya/Documents/mycodex/src/routine.c#L51-L53) & [src/monitor.c](file:///Users/okhouya/Documents/mycodex/src/monitor.c#L18-L23))**:
+  We protect all accesses to `last_compile`, `compile_count`, and `data->stopped` with `state_mutex`:
+  ```c
+  // Coder thread (write):
+  pthread_mutex_lock(&coder->data->state_mutex);
+  coder->last_compile = get_time_ms();
+  pthread_mutex_unlock(&coder->data->state_mutex);
+
+  // Monitor thread (read):
+  pthread_mutex_lock(&data->state_mutex);
+  last = data->coders[i].last_compile;
+  pthread_mutex_unlock(&data->state_mutex);
+  ```
+  This eliminates 100% of data races and guarantees strict memory synchronization across all CPU cores (verified with `-fsanitize=thread`).
+
+---
+
+### Problem 4: Hardware Cooldown Wait Without CPU Burning
+- **The Problem**:
+  When a coder releases a dongle, the hardware enters a mandatory `dongle_cooldown` (e.g. 400ms or 800ms). If waiting threads use a spinlock loop like `while (get_time_ms() < available_at)`, the CPU runs at 100% usage, overheating the machine and starving other threads. If they call `usleep()` while holding `dongle.mutex`, the entire dongle is blocked and no other thread can even enqueue a request!
+- **The Solution in My Code ([src/dongle.c](file:///Users/okhouya/Documents/mycodex/src/dongle.c#L40-L42))**:
+  We use **`pthread_cond_timedwait`** with absolute nanosecond timestamps:
+  ```c
+  ts.tv_sec = d->available_at / 1000;
+  ts.tv_nsec = (d->available_at % 1000) * 1000000;
+  pthread_cond_timedwait(&d->cond, &d->mutex, &ts);
+  ```
+  `pthread_cond_timedwait` **atomically releases the mutex and puts the thread to sleep in the kernel**. The kernel wakes the thread at the exact nanosecond that the cooldown expires, consuming **0% CPU** while sleeping.
+
+---
+
+### Problem 5: Unfair Contention & Queue Arbitration (FIFO vs EDF)
+- **The Problem**:
+  In standard POSIX mutexes, when a mutex is unlocked, whichever thread happens to hit the CPU core first grabs the lock (uncontrolled race). In Codexion, hardware dongles must serve requests according to a strict priority policy:
+  - In `fifo`: strictly by arrival timestamp.
+  - In `edf`: strictly by earliest burnout deadline (`last_compile + burnout`).
+- **The Solution in My Code ([src/scheduler.c](file:///Users/okhouya/Documents/mycodex/src/scheduler.c) & [src/dongle.c](file:///Users/okhouya/Documents/mycodex/src/dongle.c#L25-L35))**:
+  Each dongle has its own priority queue (`t_heap queue`).
+  1. A requesting coder pushes its request (`heap_push(&d->queue, request)`).
+  2. Inside `scheduler.c`, the function `higher()` compares requests according to the selected policy:
+     - `FIFO`: compares `a.arrival < b.arrival`.
+     - `EDF`: compares `a.deadline < b.deadline` (with scale tie-breaker `a.id > b.id`).
+  3. A coder is **only allowed to take the dongle if it is at the root of the queue**:
+     ```c
+     if (!d->taken && (top_request(&d->queue) == coder->id))
+     ```
+  4. If another coder is higher in the queue, the thread calls `pthread_cond_wait(&d->cond, &d->mutex)` and waits its turn.
+
+---
+
+### Problem 6: The Single Coder Edge Case (`number_of_coders == 1`)
+- **The Problem**:
+  When `./codexion 1 800 200 200 200 10 0 fifo` is run:
+  - There is only 1 coder and only 1 dongle (`left == 0` and `right == 0`).
+  - A coder needs 2 dongles to compile.
+  - If the coder attempts to lock the right dongle, it tries to lock the same dongle it already holds, causing a **self-deadlock** (thread permanently freezes).
+- **The Solution in My Code ([src/dongle.c](file:///Users/okhouya/Documents/mycodex/src/dongle.c#L75-L83))**:
+  We explicitly detect when `first == second`:
+  ```c
+  if (first == second) {
+      while (!is_stopped(coder->data))
+          sleep_for_ms(1, coder->data);
+      realease_dongles(coder);
+      return (0);
+  }
+  ```
+  The coder picks up the 1st dongle (printing `0 1 has taken a dongle`), waits peacefully until the burnout limit is reached, releases the dongle, and exits cleanly.
+
+---
+
+### Problem 7: Imprecise Burnout Detection (<1ms Accuracy)
+- **The Problem**:
+  The 42 evaluation sheet requires burnout to be detected within $\pm 10\text{ms}$ of the exact timestamp. If the monitor thread uses a coarse sleep like `usleep(10000)` (10ms) or `sleep(1)`, OS scheduling latency can cause the death log to appear 15ms or 20ms late, failing the evaluation.
+- **The Solution in My Code ([src/monitor.c](file:///Users/okhouya/Documents/mycodex/src/monitor.c#L62))**:
+  The monitor thread polls at high frequency using **sub-millisecond intervals**:
+  ```c
+  usleep(250); // Checks every 0.25 milliseconds (4000 times per second)
+  ```
+  Burnout is caught almost instantaneously (within $\le 1\text{ms}$ of precision).
+
+---
+
+### Problem 8: Thread Leaks & Hanging on Simulation Stop
+- **The Problem**:
+  When one coder burns out or all coders complete their required compilations, other coders might be blocked inside `pthread_cond_wait(&d->cond, &d->mutex)` waiting for dongles that will never be released. If these threads remain blocked, `pthread_join` in `main.c` will **hang forever**, leaking threads and preventing the program from terminating.
+- **The Solution in My Code ([src/monitor.c](file:///Users/okhouya/Documents/mycodex/src/monitor.c#L36-L45))**:
+  Whenever the monitor detects a stop condition:
+  1. It locks `state_mutex` and sets `data->stopped = 1`.
+  2. It immediately iterates through **all dongles** and calls **`pthread_cond_broadcast(&data->dongles[i].cond)`**:
+     ```c
+     i = 0;
+     while (i < data->number_of_coders) {
+         pthread_mutex_lock(&data->dongles[i].mutex);
+         pthread_cond_broadcast(&data->dongles[i].cond);
+         pthread_mutex_unlock(&data->dongles[i].mutex);
+         i++;
+     }
+     ```
+  3. Every sleeping thread is instantly woken up, detects `is_stopped(data) == 1`, exits its loop, and returns cleanly. All threads join successfully in `main.c`.
 
 ---
 
@@ -204,14 +340,19 @@ If the lock word is already `1` (another thread holds the mutex):
   - If other threads are waiting, it invokes `sys_futex(FUTEX_WAKE)` / `__psynch_mutexdrop`.
   - The kernel wakes up one waiting thread from the wait queue, marks it runnable, and it acquires the lock.
 
-### Mutexes in Our Project:
-1. **`print_mutex`**:
-   - Protects the terminal output buffer (`stdout`).
-   - Ensures that multiple threads printing simultaneously cannot interleave their characters or scramble lines.
-2. **`state_mutex`**:
-   - Protects shared simulation state: `data->stopped`, `coder->last_compile`, and `coder->compile_count`.
-3. **`dongle[i].mutex`**:
-   - Protects the specific dongle's internal state: `taken`, `available_at`, and its min-heap priority queue (`queue`).
+### How Mutexes Solve Real Problems in Our Code:
+
+#### 1. `print_mutex`
+- **The Problem It Solves**: The standard C library function `printf()` writes to a shared user-space stream (`stdout`). When multiple threads call `printf()` concurrently, the OS kernel context-switches mid-string, interleaving characters from different threads (e.g. `200 1 200 2 is is dcompebiugggingng`).
+- **The Solution in Our Code**: Every print is wrapped in `pthread_mutex_lock(&data->print_mutex)`. Only one thread can write to `stdout` at a time. After writing, it unlocks the mutex, guaranteeing clean, unbroken log lines.
+
+#### 2. `state_mutex`
+- **The Problem It Solves**: In concurrent execution, Coder 1 updates `coder->last_compile = get_time_ms()` while the Monitor thread reads `coder->last_compile` to check for burnout. Without synchronization, this creates a **Data Race**, causing CPU cache incoherency and "torn reads" (where the 64-bit value is read half-updated), leading to false burnouts or missed deaths.
+- **The Solution in Our Code**: Both the write in `coder_routine()` and the read in `monitor_routine()` acquire `pthread_mutex_lock(&data->state_mutex)`. This issues CPU hardware memory barriers (fences), ensuring the Monitor reads the exact updated value from memory every single time.
+
+#### 3. `dongle[i].mutex`
+- **The Problem It Solves**: Adjacent Coders $i$ and $i+1$ share Dongle $i$. If both coders attempt to push their request into `d->queue` or check `d->taken` at the exact same millisecond, they will corrupt the heap array (`heap->items`), cause memory corruption, or both acquire the same dongle simultaneously.
+- **The Solution in Our Code**: Every single operation on Dongle $i$ (pushing to heap, checking top of heap, checking cooldown, popping, and changing `taken`) is enclosed inside `pthread_mutex_lock(&data->dongles[id].mutex)`. Only one coder can modify that dongle's hardware state at any instant.
 
 ---
 
