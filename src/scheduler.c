@@ -1,8 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   scheduler.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: okhouya <okhouya@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/13 01:00:00 by okhouya           #+#    #+#             */
+/*   Updated: 2026/09/13 01:00:00 by okhouya          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
-// compare two requests who have the higher policy
-// returns 1 if
-static int higher(t_request a, t_request b, int policy)
+/*
+** compare two requests who have the higher priority
+** returns 1 if request a has higher priority than b
+*/
+static int	higher(t_request a, t_request b, int policy)
 {
 	if (policy == FIFO)
 	{
@@ -15,17 +29,13 @@ static int higher(t_request a, t_request b, int policy)
 	return (a.id > b.id);
 }
 
-static void swap(t_request *a, t_request *b)
+/*
+** push a new request to the heap
+*/
+void	heap_push(t_heap *heap, t_request request)
 {
-	t_request tmp;
+	t_request	tmp;
 
-	tmp = *a;
-	*a = *b;
-	*b = tmp;
-}
-
-void heap_push(t_heap *heap, t_request request)
-{
 	if (heap->size == 0)
 	{
 		heap->items[0] = request;
@@ -37,28 +47,41 @@ void heap_push(t_heap *heap, t_request request)
 		heap->items[1] = request;
 		heap->size = 2;
 		if (higher(heap->items[1], heap->items[0], heap->policy))
-			swap(&heap->items[0], &heap->items[1]);
+		{
+			tmp = heap->items[0];
+			heap->items[0] = heap->items[1];
+			heap->items[1] = tmp;
+		}
 	}
 }
 
-int top_request(t_heap *heap)
+/*
+** return the coder id of the top request in the heap
+*/
+int	top_request(t_heap *heap)
 {
 	if (heap->size == 0)
 		return (-1);
 	return (heap->items[0].id);
 }
 
-void heap_pop_first(t_heap *heap)
+/*
+** pop the first request from the heap
+** we decrease the size so what is beyond it does not count anymore
+*/
+void	heap_pop_first(t_heap *heap)
 {
 	if (heap->size == 0)
 		return ;
 	if (heap->size == 2)
 		heap->items[0] = heap->items[1];
-	// we decrease the size so what beyond it doest count anymore
 	heap->size--;
 }
 
-void remove_request(t_heap *heap, int id)
+/*
+** remove a specific request from the heap by coder id
+*/
+void	remove_request(t_heap *heap, int id)
 {
 	if (heap->size == 0)
 		return ;
