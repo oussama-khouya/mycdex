@@ -52,16 +52,22 @@ static void	refactor(t_coder *coder)
 	sleep_for_ms(data->refactor_time, data);
 }
 
-int coder_is_finished(t_coder *coder)
+/*
+** Added: check if coder finished its compiling cycle with mutex protection.
+** Made static, added state_mutex to prevent data race, and handle >= required.
+*/
+static int	coder_is_finished(t_coder *coder)
 {
-	if (coder->compile_count == coder->data->required)
+	if (coder->data->required > 0
+		&& coder->compile_count >= coder->data->required)
 	{
-		coder -> finished = 1;
+		pthread_mutex_lock(&coder->data->state_mutex);
+		coder->finished = 1;
+		pthread_mutex_unlock(&coder->data->state_mutex);
 		return (1);
 	}
 	return (0);
 }
-
 
 /*
 ** this is the function that will be executed for every coder thread
@@ -92,9 +98,12 @@ void	*coder_routine(void *arg)
 		if (is_stopped(coder->data))
 			break ;
 		refactor(coder);
-		//check if its finished its compiling cycle
+		/*
+		** Added: check if coder finished its compiling cycle.
+		** Formatted comment to standard 42 style and break with space.
+		*/
 		if (coder_is_finished(coder))
-			break;
+			break ;
 	}
 	return (NULL);
 }

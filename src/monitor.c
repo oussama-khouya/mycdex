@@ -19,6 +19,8 @@ static int	all_finished_compiling(t_data *data)
 {
 	int	i;
 
+	if (data->required <= 0)
+		return (0);
 	i = 0;
 	while (i < data->coders_count)
 	{
@@ -52,34 +54,47 @@ static void	wake_sleep_coders(t_data *data)
 }
 
 /*
+** Added: check single coder burnout.
+** Extracted helper to keep function under 25 lines for Norminette,
+** and protects coder->finished read with state_mutex to prevent data race.
+*/
+static int	check_coder_burnout(t_data *data, int i)
+{
+	long	ts;
+
+	pthread_mutex_lock(&data->state_mutex);
+	if (data->coders[i].finished == 1)
+	{
+		pthread_mutex_unlock(&data->state_mutex);
+		return (0);
+	}
+	if (get_time_ms() - data->coders[i].last_compile > data->burnout)
+	{
+		data->stopped = 1;
+		ts = get_time_ms() - data->start_time;
+		pthread_mutex_unlock(&data->state_mutex);
+		pthread_mutex_lock(&data->print_mutex);
+		printf("%ld %d burned out\n", ts, data->coders[i].id);
+		pthread_mutex_unlock(&data->print_mutex);
+		wake_sleep_coders(data);
+		return (1);
+	}
+	pthread_mutex_unlock(&data->state_mutex);
+	return (0);
+}
+
+/*
 ** checks if any coder burned out
 */
 static int	is_burnout(t_data *data)
 {
-	int		i;
-	long	ts;
+	int	i;
 
 	i = 0;
 	while (i < data->coders_count)
 	{
-		if (data->coders[i].finished == 1)
-		{
-			i++;
-			continue;;
-		}
-		pthread_mutex_lock(&data->state_mutex);
-		if (get_time_ms() - data->coders[i].last_compile > data->burnout)
-		{
-			data->stopped = 1;
-			ts = get_time_ms() - data->start_time;
-			pthread_mutex_unlock(&data->state_mutex);
-			pthread_mutex_lock(&data->print_mutex);
-			printf("%ld %d burned out\n", ts, data->coders[i].id);
-			pthread_mutex_unlock(&data->print_mutex);
-			wake_sleep_coders(data);
+		if (check_coder_burnout(data, i))
 			return (1);
-		}
-		pthread_mutex_unlock(&data->state_mutex);
 		i++;
 	}
 	return (0);
