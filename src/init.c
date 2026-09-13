@@ -21,8 +21,8 @@ static int parse_args(t_data *data, int ac, char **av)
         return (0);
     
     // check policies
-    if (strcmp(av[8] , "lifo") == 0)
-        data -> policy = LIFO;
+    if (strcmp(av[8] , "fifo") == 0)
+        data -> policy = FIFO;
     else if (strcmp(av[8], "edf") == 0)
         data->policy = EDF;
     else
