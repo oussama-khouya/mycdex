@@ -16,6 +16,8 @@ static int take_dongle(t_coder *coder, int dongle_id) {
   request.id = coder->id;
   request.arrival = get_time_ms();
 
+  //printf("request by coder %d for dongle %d\n", coder -> id, dongle_id);
+
   pthread_mutex_lock(&data->state_mutex);
   request.deadline = coder->last_compile + data->burnout;
   pthread_mutex_unlock(&data->state_mutex);
@@ -29,6 +31,8 @@ static int take_dongle(t_coder *coder, int dongle_id) {
     if (!(d->taken) && (top_request(&d->queue) == coder->id)) {
       // check cooldown peroid
       if (get_time_ms() >= d->available_at) {
+
+        //printf("taken coder %d to dongle %d\n", coder->id, dongle_id);
         d->taken = 1;
         // take request out of the dongle s heap
         heap_pop_first(&d->queue);
