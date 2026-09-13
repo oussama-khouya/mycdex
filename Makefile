@@ -1,7 +1,8 @@
 NAME = codexion
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -pthread -Isrc
+F = fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror -pthread -Isrc 
 
 SRC_DIR = src
 OBJ_DIR = obj

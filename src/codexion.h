@@ -26,6 +26,7 @@ typedef struct s_data	t_data;
 /* coder struct */
 typedef struct s_coder
 {
+	int				finished;
 	int				id;
 	int				right;
 	int				left;

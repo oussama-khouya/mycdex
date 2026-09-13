@@ -52,6 +52,17 @@ static void	refactor(t_coder *coder)
 	sleep_for_ms(data->refactor_time, data);
 }
 
+int coder_is_finished(t_coder *coder)
+{
+	if (coder->compile_count == coder->data->required)
+	{
+		coder -> finished = 1;
+		return (1);
+	}
+	return (0);
+}
+
+
 /*
 ** this is the function that will be executed for every coder thread
 ** running while not stopped:
@@ -81,6 +92,9 @@ void	*coder_routine(void *arg)
 		if (is_stopped(coder->data))
 			break ;
 		refactor(coder);
+		//check if its finished its compiling cycle
+		if (coder_is_finished(coder))
+			break;
 	}
 	return (NULL);
 }

@@ -23,7 +23,7 @@ static int	all_finished_compiling(t_data *data)
 	while (i < data->coders_count)
 	{
 		pthread_mutex_lock(&data->state_mutex);
-		if (data->coders[i].compile_count < data->required)
+		if (data->coders[i].finished == 0)
 		{
 			pthread_mutex_unlock(&data->state_mutex);
 			return (0);
@@ -62,6 +62,11 @@ static int	is_burnout(t_data *data)
 	i = 0;
 	while (i < data->coders_count)
 	{
+		if (data->coders[i].finished == 1)
+		{
+			i++;
+			continue;;
+		}
 		pthread_mutex_lock(&data->state_mutex);
 		if (get_time_ms() - data->coders[i].last_compile > data->burnout)
 		{

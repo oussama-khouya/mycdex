@@ -13,9 +13,7 @@
 #include "codexion.h"
 
 /*
-** this file is for data initialization
 ** parse the arguments from CLI and store them in the data struct
-** check policies and succeed
 */
 static int	parse_args(t_data *data, int ac, char **av)
 {
@@ -77,6 +75,7 @@ static void	init_coders(t_data *data)
 	i = 0;
 	while (i < data->coders_count)
 	{
+		data->coders[i].finished = 0;
 		data->coders[i].id = i + 1;
 		data->coders[i].left = i;
 		data->coders[i].right = (i + 1) % data->coders_count;
