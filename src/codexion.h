@@ -27,6 +27,7 @@ typedef struct s_coder
 
 //define policies
 
+# define FIFO 0
 # define LIFO 0
 # define EDF 1
 
