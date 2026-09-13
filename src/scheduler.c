@@ -4,10 +4,10 @@
 // returns 1 if
 static int higher(t_request a, t_request b, int policy)
 {
-	if (policy == LIFO)
+	if (policy == FIFO)
 	{
 		if (a.arrival != b.arrival)
-			return (a.arrival > b.arrival);
+			return (a.arrival < b.arrival);
 		return (a.id < b.id);
 	}
 	if (a.deadline != b.deadline)
