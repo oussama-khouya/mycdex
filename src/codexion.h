@@ -94,6 +94,7 @@ void	heap_pop_first(t_heap *heap);
 void	remove_request(t_heap *heap, int id);
 void	*coder_routine(void *arg);
 
+int		handle_single_coder(t_coder *coder);
 int		take_dongles(t_coder *coder);
 void	release_dongles(t_coder *coder);
 void	*monitor(void *arg);

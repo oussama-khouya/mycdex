@@ -41,6 +41,15 @@ static void	join_threads(t_data *data)
 	}
 }
 
+int	handle_single_coder(t_coder *coder)
+{
+	print_status(coder, "has taken a dongle");
+	while (!is_stopped(coder->data))
+		sleep_for_ms(1, coder->data);
+	release_dongles(coder);
+	return (0);
+}
+
 int	main(int ac, char **av)
 {
 	t_data	data;
