@@ -13,7 +13,7 @@
 #include "codexion.h"
 
 /*
-** checks if all coders have finished required number of compilations
+** Checks if all coders have finished required number of compilations.
 */
 static int	all_finished_compiling(t_data *data)
 {
@@ -35,7 +35,7 @@ static int	all_finished_compiling(t_data *data)
 }
 
 /*
-** wake up the coders that were asleep when simulation stops
+** Wakes up coders that were waiting when simulation stops.
 */
 static void	wake_sleep_coders(t_data *data)
 {
@@ -51,12 +51,10 @@ static void	wake_sleep_coders(t_data *data)
 	}
 }
 
-
 static int	check_coder_burnout(t_data *data, int i)
 {
 	long	time;
 
-	/*if some coders are finished compiling dont set then as buout*/
 	pthread_mutex_lock(&data->state_mutex);
 	if (data->coders[i].finished == 1)
 	{
@@ -79,7 +77,7 @@ static int	check_coder_burnout(t_data *data, int i)
 }
 
 /*
-** checks if any coder burned out
+** Checks if any coder burned out.
 */
 static int	is_burnout(t_data *data)
 {
@@ -96,7 +94,7 @@ static int	is_burnout(t_data *data)
 }
 
 /*
-** checks burnout, completion, and sleeps 250us to avoid wasting CPU
+** Monitor thread routine: checks burnout and completion.
 */
 void	*monitor(void *arg)
 {

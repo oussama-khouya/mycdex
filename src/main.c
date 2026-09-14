@@ -12,7 +12,6 @@
 
 #include "codexion.h"
 
-
 static void	start_threads(t_data *data)
 {
 	int	i;
@@ -26,7 +25,6 @@ static void	start_threads(t_data *data)
 	}
 	pthread_create(&data->monitor_thread, NULL, monitor, data);
 }
-
 
 static void	join_threads(t_data *data)
 {
@@ -60,7 +58,6 @@ int	main(int ac, char **av)
 		write(2, "Error: Invalid arguments\n", 25);
 		return (1);
 	}
-
 	start_threads(&data);
 	join_threads(&data);
 	cleanup(&data);

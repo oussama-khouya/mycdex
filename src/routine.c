@@ -12,7 +12,6 @@
 
 #include "codexion.h"
 
-
 static void	compile(t_coder *coder)
 {
 	t_data	*data;
@@ -25,7 +24,6 @@ static void	compile(t_coder *coder)
 	pthread_mutex_unlock(&data->state_mutex);
 }
 
-
 static void	debug(t_coder *coder)
 {
 	t_data	*data;
@@ -34,7 +32,6 @@ static void	debug(t_coder *coder)
 	print_status(coder, "is debugging");
 	sleep_for_ms(data->debug_time, data);
 }
-
 
 static void	refactor(t_coder *coder)
 {
@@ -46,7 +43,7 @@ static void	refactor(t_coder *coder)
 }
 
 /*
-check if coder finished its compiling cycle 
+** Checks if coder finished its required compiling cycles.
 */
 static int	coder_is_finished(t_coder *coder)
 {
@@ -61,14 +58,15 @@ static int	coder_is_finished(t_coder *coder)
 }
 
 /*
-this is the function that will be executed for every coder thread
+** Routine executed by each coder thread.
 */
 void	*coder_routine(void *arg)
 {
 	t_coder	*coder;
 
 	coder = (t_coder *)arg;
-	
+	if (coder->id % 2 == 0)
+		usleep(500);
 	while (!is_stopped(coder->data))
 	{
 		if (!take_dongles(coder))
@@ -84,9 +82,6 @@ void	*coder_routine(void *arg)
 		if (is_stopped(coder->data))
 			break ;
 		refactor(coder);
-		/*
-		check if coder finished its compiling cycle.
-		*/
 		if (coder_is_finished(coder))
 			break ;
 	}

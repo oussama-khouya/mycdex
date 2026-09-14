@@ -12,29 +12,26 @@
 
 #include "codexion.h"
 
+/*
+** Checks if a dongle can be taken by coder:
+** Must not be currently taken, cooldown must have elapsed,
+** and coder must be at the top of the priority queue (FIFO / EDF).
+*/
 static int	can_take_d(t_coder *c, int id)
 {
 	t_dongle	*d;
-	int			o_id;
-	int			o_d;
-	t_dongle	*od;
 
 	d = &c->data->dongles[id];
 	if (d->taken || get_time_ms() < d->available_at)
 		return (0);
-	if (top_request(&d->queue) == c->id)
-		return (1);
-	if (c->id == id + 1)
-		o_id = (id == 0 ? c->data->coders_count : id);
-	else
-		o_id = id + 1;
-	o_d = c->data->coders[o_id - 1].left;
-	if (o_d == id)
-		o_d = c->data->coders[o_id - 1].right;
-	od = &c->data->dongles[o_d];
-	return (od->taken || get_time_ms() < od->available_at);
+	return (top_request(&d->queue) == c->id);
 }
-//get
+
+/*
+** Waits until both dongles 'f' and 's' are ready to be taken simultaneously.
+** If a dongle is on cooldown, timedwaits until available_at.
+** Otherwise waits on condvar until woken up when a dongle is released.
+*/
 static void	wait_both(t_coder *coder, int f, int s)
 {
 	t_dongle		*d;
@@ -60,6 +57,10 @@ static void	wait_both(t_coder *coder, int f, int s)
 	}
 }
 
+/*
+** Enqueues the coder's request into both dongles' priority queues
+** under state_mutex. Contains coder ID, arrival time, and burnout deadline.
+*/
 static void	push_both(t_coder *coder, int f, int s)
 {
 	t_request	req;
@@ -72,6 +73,11 @@ static void	push_both(t_coder *coder, int f, int s)
 	heap_push(&coder->data->dongles[s].queue, req);
 }
 
+/*
+** Atomically acquires both dongles at once to eliminate hold-and-wait starvation.
+** Enqueues to both queues, waits until both are available, then claims both.
+** If only 1 coder exists, delegates to handle_single_coder.
+*/
 int	take_dongles(t_coder *coder)
 {
 	int			f;
@@ -79,25 +85,30 @@ int	take_dongles(t_coder *coder)
 	int			ok;
 	t_dongle	*d;
 
-	if (coder->left == coder->right)
+	f = coder->left;
+	s = coder->right;
+	if (f == s)
 		return (handle_single_coder(coder));
-	f = coder->left < coder->right ? coder->left : coder->right;
-	s = coder->left + coder->right - f;
 	d = coder->data->dongles;
 	push_both(coder, f, s);
 	wait_both(coder, f, s);
 	remove_request(&d[f].queue, coder->id);
 	remove_request(&d[s].queue, coder->id);
 	ok = !coder->data->stopped;
-	if (ok)
-		d[f].taken = (d[s].taken = 1);
+	d[f].taken = ok;
+	d[s].taken = ok;
 	pthread_mutex_unlock(&coder->data->state_mutex);
-	if (ok)
-		return (print_status(coder, "has taken a dongle"),
-			print_status(coder, "has taken a dongle"), 1);
-	return (0);
+	if (!ok)
+		return (0);
+	print_status(coder, "has taken a dongle");
+	print_status(coder, "has taken a dongle");
+	return (1);
 }
 
+/*
+** Releases both dongles, sets their cooldown timestamp (now + cooldown),
+** and broadcasts their condition variables to wake up waiting coders.
+*/
 void	release_dongles(t_coder *coder)
 {
 	t_dongle	*df;

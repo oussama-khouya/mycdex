@@ -13,8 +13,8 @@
 #include "codexion.h"
 
 /*
-** compare two requests who have the higher priority
-** returns 1 if request a has higher priority than b
+** Compares two requests to determine which has higher priority.
+** Returns 1 if request a has higher priority than b.
 */
 static int	higher(t_request a, t_request b, int policy)
 {
@@ -28,7 +28,6 @@ static int	higher(t_request a, t_request b, int policy)
 		return (a.deadline < b.deadline);
 	return (a.id > b.id);
 }
-
 
 void	heap_push(t_heap *heap, t_request request)
 {
@@ -53,14 +52,12 @@ void	heap_push(t_heap *heap, t_request request)
 	}
 }
 
-
 int	top_request(t_heap *heap)
 {
 	if (heap->size == 0)
 		return (-1);
 	return (heap->items[0].id);
 }
-
 
 void	heap_pop_first(t_heap *heap)
 {
@@ -72,7 +69,7 @@ void	heap_pop_first(t_heap *heap)
 }
 
 /*
-** remove a specific request from the heap by coder id
+** Removes a specific request from the heap by coder id.
 */
 void	remove_request(t_heap *heap, int id)
 {
