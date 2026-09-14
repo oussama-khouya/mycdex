@@ -57,7 +57,6 @@ static int	coder_is_finished(t_coder *coder)
 	return (0);
 }
 
-
 void	*coder_routine(void *arg)
 {
 	t_coder	*coder;

@@ -12,7 +12,6 @@
 
 #include "codexion.h"
 
-
 static int	higher(t_request a, t_request b, int policy)
 {
 	if (policy == FIFO)

@@ -37,9 +37,9 @@ static int	all_finished_compiling(t_data *data)
 /*
 ** Wakes up coders that were waiting when simulation stops.
 */
-static void wake_sleep_coders(t_data *data)
+static void	wake_sleep_coders(t_data *data)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	pthread_mutex_lock(&data->state_mutex);

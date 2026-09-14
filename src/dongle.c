@@ -23,7 +23,7 @@ static int	can_take_dongle(t_coder *c, int id)
 	d = &c->data->dongles[id];
 	if (d->taken || get_time_ms() < d->available_at)
 		return (0);
-	//it also should be the top request
+	/*it also should be the top request*/
 	return (top_request(&d->queue) == c->id);
 }
 
@@ -38,16 +38,16 @@ static void	wait_both(t_coder *coder, int first, int second)
 	struct timespec	ts;
 	long			now;
 
-	while (!coder->data->stopped && (!can_take_dongle(coder, first) || !can_take_dongle(coder, second)))
+	while (!coder->data->stopped && (!can_take_dongle(coder, first)
+			|| !can_take_dongle(coder, second)))
 	{
 		d = &coder->data->dongles[first];
 		now = get_time_ms();
-
-		if (!d->taken && now >= d->available_at && top_request(&d->queue) == coder->id)
-			//then wait for the second
+		/*then wait for the second*/
+		if (!d->taken && now >= d->available_at
+			&& top_request(&d->queue) == coder->id)
 			d = &coder->data->dongles[second];
-
-		// on cooldown
+		/* on cooldown */
 		if (!d->taken && now < d->available_at)
 		{
 			ts.tv_sec = d->available_at / 1000;
@@ -58,7 +58,6 @@ static void	wait_both(t_coder *coder, int first, int second)
 			pthread_cond_wait(&d->cond, &coder->data->state_mutex);
 	}
 }
-
 
 static void	push_both(t_coder *coder, int first, int second)
 {

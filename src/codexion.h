@@ -52,7 +52,6 @@ typedef struct s_heap
 	int			policy;
 }	t_heap;
 
-
 typedef struct s_dongle
 {
 	pthread_mutex_t	mutex;
@@ -80,7 +79,6 @@ typedef struct s_data
 	t_coder			*coders;
 	pthread_t		monitor_thread;
 }	t_data;
-
 
 int		my_atoi(const char *str);
 void	cleanup(t_data *data);
