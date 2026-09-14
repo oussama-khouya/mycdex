@@ -52,7 +52,7 @@ typedef struct s_heap
 	int			policy;
 }	t_heap;
 
-/* dongle struct */
+
 typedef struct s_dongle
 {
 	pthread_mutex_t	mutex;
@@ -62,7 +62,6 @@ typedef struct s_dongle
 	t_heap			queue;
 }	t_dongle;
 
-/* build the data struct that is shared data */
 typedef struct s_data
 {
 	int				coders_count;
@@ -82,7 +81,7 @@ typedef struct s_data
 	pthread_t		monitor_thread;
 }	t_data;
 
-/* functions */
+
 int		my_atoi(const char *str);
 void	cleanup(t_data *data);
 int		init_data(t_data *data, int ac, char **av);

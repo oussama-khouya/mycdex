@@ -38,7 +38,7 @@ static void	join_threads(t_data *data)
 		i++;
 	}
 }
-
+/*added here cause i have no space*/
 int	handle_single_coder(t_coder *coder)
 {
 	print_status(coder, "has taken a dongle");

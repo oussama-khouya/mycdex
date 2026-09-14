@@ -12,10 +12,7 @@
 
 #include "codexion.h"
 
-/*
-** Compares two requests to determine which has higher priority.
-** Returns 1 if request a has higher priority than b.
-*/
+
 static int	higher(t_request a, t_request b, int policy)
 {
 	if (policy == FIFO)

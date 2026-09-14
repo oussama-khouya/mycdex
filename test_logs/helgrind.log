@@ -1,260 +1,260 @@
-==772963== Helgrind, a thread error detector
-==772963== Copyright (C) 2007-2017, and GNU GPL'd, by OpenWorks LLP et al.
-==772963== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==772963== Command: ./codexion 5 2000 200 200 200 10 0 fifo
-==772963== 
+==834529== Helgrind, a thread error detector
+==834529== Copyright (C) 2007-2017, and GNU GPL'd, by OpenWorks LLP et al.
+==834529== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==834529== Command: ./codexion 5 2000 200 200 200 10 0 fifo
+==834529== 
 8 1 has taken a dongle
-13 1 has taken a dongle
-13 1 is compiling
+12 1 has taken a dongle
+12 1 is compiling
 15 3 has taken a dongle
 15 3 has taken a dongle
 15 3 is compiling
-215 1 is debugging
+214 1 is debugging
 215 3 is debugging
-216 2 has taken a dongle
-216 2 has taken a dongle
-216 2 is compiling
-216 4 has taken a dongle
-216 4 has taken a dongle
-216 4 is compiling
-415 1 is refactoring
+215 2 has taken a dongle
+215 2 has taken a dongle
+215 2 is compiling
+215 4 has taken a dongle
+215 4 has taken a dongle
+215 4 is compiling
+414 1 is refactoring
+415 2 is debugging
 415 3 is refactoring
-416 2 is debugging
 416 4 is debugging
 416 5 has taken a dongle
 416 5 has taken a dongle
 416 5 is compiling
-615 3 has taken a dongle
-615 3 has taken a dongle
-615 3 is compiling
+615 2 is refactoring
 616 4 is refactoring
-616 5 is debugging
-616 2 is refactoring
-616 1 has taken a dongle
-616 1 has taken a dongle
-616 1 is compiling
-815 3 is debugging
-816 5 is refactoring
-816 1 is debugging
-816 2 has taken a dongle
-816 2 has taken a dongle
-816 2 is compiling
-817 4 has taken a dongle
-817 4 has taken a dongle
-817 4 is compiling
-1015 3 is refactoring
-1016 1 is refactoring
-1016 2 is debugging
-1017 4 is debugging
+616 3 has taken a dongle
+616 3 has taken a dongle
+616 3 is compiling
+617 1 has taken a dongle
+617 1 has taken a dongle
+617 1 is compiling
+617 5 is debugging
+816 3 is debugging
+816 4 has taken a dongle
+816 4 has taken a dongle
+816 4 is compiling
+817 1 is debugging
+817 2 has taken a dongle
+817 2 has taken a dongle
+817 2 is compiling
+817 5 is refactoring
+1016 3 is refactoring
+1016 4 is debugging
+1017 2 is debugging
 1017 5 has taken a dongle
 1017 5 has taken a dongle
 1017 5 is compiling
-1215 3 has taken a dongle
-1215 3 has taken a dongle
-1215 3 is compiling
-1216 2 is refactoring
-1217 4 is refactoring
+1017 1 is refactoring
+1216 4 is refactoring
+1216 3 has taken a dongle
+1216 3 has taken a dongle
+1216 3 is compiling
 1217 5 is debugging
 1217 1 has taken a dongle
 1217 1 has taken a dongle
 1217 1 is compiling
-1415 3 is debugging
-1417 1 is debugging
+1217 2 is refactoring
+1416 3 is debugging
+1416 4 has taken a dongle
+1416 4 has taken a dongle
+1416 4 is compiling
 1417 5 is refactoring
-1417 4 has taken a dongle
-1417 4 has taken a dongle
-1418 4 is compiling
-1418 2 has taken a dongle
-1418 2 has taken a dongle
-1418 2 is compiling
-1615 3 is refactoring
+1417 1 is debugging
+1417 2 has taken a dongle
+1417 2 has taken a dongle
+1417 2 is compiling
+1616 4 is debugging
+1616 3 is refactoring
+1617 5 has taken a dongle
+1617 5 has taken a dongle
+1617 5 is compiling
+1617 2 is debugging
 1617 1 is refactoring
-1618 2 is debugging
-1618 4 is debugging
-1618 5 has taken a dongle
-1618 5 has taken a dongle
-1618 5 is compiling
-1815 3 has taken a dongle
-1815 3 has taken a dongle
-1815 3 is compiling
-1818 2 is refactoring
-1818 4 is refactoring
-1819 5 is debugging
-1819 1 has taken a dongle
-1819 1 has taken a dongle
-1819 1 is compiling
-2015 3 is debugging
-2018 4 has taken a dongle
-2018 4 has taken a dongle
-2018 4 is compiling
-2019 1 is debugging
-2019 2 has taken a dongle
-2019 2 has taken a dongle
-2019 2 is compiling
-2019 5 is refactoring
-2215 3 is refactoring
-2218 4 is debugging
-2219 1 is refactoring
-2219 2 is debugging
-2219 5 has taken a dongle
-2219 5 has taken a dongle
-2219 5 is compiling
-2415 3 has taken a dongle
-2415 3 has taken a dongle
-2415 3 is compiling
-2418 4 is refactoring
-2419 5 is debugging
-2419 2 is refactoring
-2419 1 has taken a dongle
-2419 1 has taken a dongle
-2419 1 is compiling
-2615 3 is debugging
-2618 4 has taken a dongle
-2618 4 has taken a dongle
-2618 4 is compiling
-2619 5 is refactoring
-2619 1 is debugging
-2619 2 has taken a dongle
-2619 2 has taken a dongle
-2619 2 is compiling
-2815 3 is refactoring
-2818 4 is debugging
-2819 2 is debugging
-2820 5 has taken a dongle
-2820 5 has taken a dongle
-2820 5 is compiling
-2820 1 is refactoring
-3015 3 has taken a dongle
-3015 3 has taken a dongle
-3015 3 is compiling
-3018 4 is refactoring
-3019 2 is refactoring
-3020 5 is debugging
-3020 1 has taken a dongle
-3020 1 has taken a dongle
-3020 1 is compiling
-3215 3 is debugging
-3218 4 has taken a dongle
-3218 4 has taken a dongle
-3218 4 is compiling
-3220 5 is refactoring
-3221 1 is debugging
-3221 2 has taken a dongle
-3221 2 has taken a dongle
-3221 2 is compiling
-3415 3 is refactoring
-3418 4 is debugging
-3420 5 has taken a dongle
-3420 5 has taken a dongle
-3420 5 is compiling
-3421 2 is debugging
-3421 1 is refactoring
-3615 3 has taken a dongle
-3615 3 has taken a dongle
-3615 3 is compiling
-3618 4 is refactoring
-3620 5 is debugging
-3621 2 is refactoring
-3621 1 has taken a dongle
-3621 1 has taken a dongle
-3621 1 is compiling
-3815 3 is debugging
-3818 4 has taken a dongle
-3818 4 has taken a dongle
+1816 3 has taken a dongle
+1816 3 has taken a dongle
+1816 3 is compiling
+1816 4 is refactoring
+1817 1 has taken a dongle
+1817 1 has taken a dongle
+1817 1 is compiling
+1817 2 is refactoring
+1817 5 is debugging
+2016 3 is debugging
+2016 4 has taken a dongle
+2016 4 has taken a dongle
+2016 4 is compiling
+2017 1 is debugging
+2017 5 is refactoring
+2017 2 has taken a dongle
+2017 2 has taken a dongle
+2017 2 is compiling
+2216 4 is debugging
+2216 3 is refactoring
+2217 5 has taken a dongle
+2217 5 has taken a dongle
+2217 5 is compiling
+2217 1 is refactoring
+2217 2 is debugging
+2416 3 has taken a dongle
+2416 3 has taken a dongle
+2416 3 is compiling
+2416 4 is refactoring
+2417 5 is debugging
+2417 1 has taken a dongle
+2417 1 has taken a dongle
+2418 1 is compiling
+2418 2 is refactoring
+2616 3 is debugging
+2616 4 has taken a dongle
+2616 4 has taken a dongle
+2616 4 is compiling
+2617 5 is refactoring
+2618 1 is debugging
+2618 2 has taken a dongle
+2618 2 has taken a dongle
+2618 2 is compiling
+2816 4 is debugging
+2816 3 is refactoring
+2817 5 has taken a dongle
+2817 5 has taken a dongle
+2817 5 is compiling
+2818 1 is refactoring
+2818 2 is debugging
+3016 3 has taken a dongle
+3016 3 has taken a dongle
+3016 3 is compiling
+3016 4 is refactoring
+3017 5 is debugging
+3018 2 is refactoring
+3018 1 has taken a dongle
+3018 1 has taken a dongle
+3018 1 is compiling
+3216 4 has taken a dongle
+3216 4 has taken a dongle
+3217 4 is compiling
+3217 3 is debugging
+3217 5 is refactoring
+3218 1 is debugging
+3218 2 has taken a dongle
+3218 2 has taken a dongle
+3218 2 is compiling
+3417 3 is refactoring
+3417 4 is debugging
+3417 5 has taken a dongle
+3417 5 has taken a dongle
+3417 5 is compiling
+3418 2 is debugging
+3418 1 is refactoring
+3617 4 is refactoring
+3617 3 has taken a dongle
+3617 3 has taken a dongle
+3617 3 is compiling
+3618 5 is debugging
+3618 2 is refactoring
+3618 1 has taken a dongle
+3618 1 has taken a dongle
+3618 1 is compiling
+3817 3 is debugging
+3817 4 has taken a dongle
+3817 4 has taken a dongle
 3818 4 is compiling
-3820 5 is refactoring
-3821 1 is debugging
-3821 2 has taken a dongle
-3821 2 has taken a dongle
-3821 2 is compiling
-4015 3 is refactoring
+3818 5 is refactoring
+3818 1 is debugging
+3818 2 has taken a dongle
+3818 2 has taken a dongle
+3818 2 is compiling
+4017 3 is refactoring
 4018 4 is debugging
-4020 5 has taken a dongle
-4020 5 has taken a dongle
-4020 5 is compiling
-4021 2 is debugging
-4021 1 is refactoring
-4215 3 has taken a dongle
-4215 3 has taken a dongle
-4215 3 is compiling
+4018 5 has taken a dongle
+4018 5 has taken a dongle
+4018 5 is compiling
+4018 2 is debugging
+4019 1 is refactoring
+4217 3 has taken a dongle
+4217 3 has taken a dongle
+4217 3 is compiling
+4218 5 is debugging
 4218 4 is refactoring
-4220 5 is debugging
-4221 2 is refactoring
-4221 1 has taken a dongle
-4221 1 has taken a dongle
-4221 1 is compiling
-4415 3 is debugging
-4418 4 has taken a dongle
+4219 2 is refactoring
+4219 1 has taken a dongle
+4220 1 has taken a dongle
+4220 1 is compiling
+4417 3 is debugging
+4418 5 is refactoring
+4419 4 has taken a dongle
 4419 4 has taken a dongle
 4419 4 is compiling
-4420 5 is refactoring
-4421 1 is debugging
-4421 2 has taken a dongle
-4422 2 has taken a dongle
-4422 2 is compiling
-4615 3 is refactoring
+4420 1 is debugging
+4420 2 has taken a dongle
+4420 2 has taken a dongle
+4421 2 is compiling
+4617 3 is refactoring
 4619 4 is debugging
-4620 5 has taken a dongle
-4620 5 has taken a dongle
-4620 5 is compiling
-4621 1 is refactoring
-4622 2 is debugging
-4815 3 has taken a dongle
-4815 3 has taken a dongle
-4815 3 is compiling
+4619 5 has taken a dongle
+4619 5 has taken a dongle
+4619 5 is compiling
+4620 1 is refactoring
+4621 2 is debugging
+4817 3 has taken a dongle
+4817 3 has taken a dongle
+4817 3 is compiling
 4819 4 is refactoring
-4820 5 is debugging
-4821 1 has taken a dongle
-4821 1 has taken a dongle
-4821 1 is compiling
-4822 2 is refactoring
-5015 3 is debugging
+4819 5 is debugging
+4820 1 has taken a dongle
+4820 1 has taken a dongle
+4820 1 is compiling
+4821 2 is refactoring
+5017 3 is debugging
+5019 5 is refactoring
 5019 4 has taken a dongle
 5019 4 has taken a dongle
 5019 4 is compiling
-5020 5 is refactoring
-5021 1 is debugging
-5022 2 has taken a dongle
-5022 2 has taken a dongle
-5022 2 is compiling
-5215 3 is refactoring
-5219 4 is debugging
+5020 1 is debugging
+5021 2 has taken a dongle
+5021 2 has taken a dongle
+5021 2 is compiling
+5217 3 is refactoring
 5220 5 has taken a dongle
 5220 5 has taken a dongle
 5220 5 is compiling
-5221 1 is refactoring
-5222 2 is debugging
-5415 3 has taken a dongle
-5415 3 has taken a dongle
-5415 3 is compiling
-5419 4 is refactoring
+5220 4 is debugging
+5220 1 is refactoring
+5221 2 is debugging
+5417 3 has taken a dongle
+5417 3 has taken a dongle
+5417 3 is compiling
 5420 5 is debugging
-5421 1 has taken a dongle
-5421 1 has taken a dongle
+5420 1 has taken a dongle
+5420 1 has taken a dongle
 5421 1 is compiling
-5422 2 is refactoring
-5615 3 is debugging
-5619 4 has taken a dongle
-5619 4 has taken a dongle
-5619 4 is compiling
+5421 4 is refactoring
+5421 2 is refactoring
+5617 3 is debugging
 5620 5 is refactoring
+5621 4 has taken a dongle
+5621 4 has taken a dongle
+5621 4 is compiling
 5621 1 is debugging
 5622 2 has taken a dongle
 5622 2 has taken a dongle
 5622 2 is compiling
-5815 3 is refactoring
-5819 4 is debugging
-5820 5 has taken a dongle
-5820 5 has taken a dongle
-5820 5 is compiling
-5821 1 is refactoring
+5817 3 is refactoring
+5821 5 has taken a dongle
+5821 5 has taken a dongle
+5821 5 is compiling
+5821 4 is debugging
 5822 2 is debugging
-6019 4 is refactoring
-6020 5 is debugging
+5822 1 is refactoring
+6021 4 is refactoring
+6021 5 is debugging
 6022 2 is refactoring
-6220 5 is refactoring
-==772963== 
-==772963== Use --history-level=approx or =none to gain increased speed, at
-==772963== the cost of reduced accuracy of conflicting-access information
-==772963== For lists of detected and suppressed errors, rerun with: -s
-==772963== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 916218 from 130)
+6221 5 is refactoring
+==834529== 
+==834529== Use --history-level=approx or =none to gain increased speed, at
+==834529== the cost of reduced accuracy of conflicting-access information
+==834529== For lists of detected and suppressed errors, rerun with: -s
+==834529== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 896620 from 133)

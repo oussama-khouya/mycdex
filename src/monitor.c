@@ -37,18 +37,18 @@ static int	all_finished_compiling(t_data *data)
 /*
 ** Wakes up coders that were waiting when simulation stops.
 */
-static void	wake_sleep_coders(t_data *data)
+static void wake_sleep_coders(t_data *data)
 {
-	int	i;
+	int i;
 
 	i = 0;
+	pthread_mutex_lock(&data->state_mutex);
 	while (i < data->coders_count)
 	{
-		pthread_mutex_lock(&data->dongles[i].mutex);
 		pthread_cond_broadcast(&data->dongles[i].cond);
-		pthread_mutex_unlock(&data->dongles[i].mutex);
 		i++;
 	}
+	pthread_mutex_unlock(&data->state_mutex);
 }
 
 static int	check_coder_burnout(t_data *data, int i)

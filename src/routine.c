@@ -57,9 +57,7 @@ static int	coder_is_finished(t_coder *coder)
 	return (0);
 }
 
-/*
-** Routine executed by each coder thread.
-*/
+
 void	*coder_routine(void *arg)
 {
 	t_coder	*coder;
