@@ -29,9 +29,7 @@ static int	higher(t_request a, t_request b, int policy)
 	return (a.id > b.id);
 }
 
-/*
-** push a new request to the heap
-*/
+
 void	heap_push(t_heap *heap, t_request request)
 {
 	t_request	tmp;
@@ -55,9 +53,7 @@ void	heap_push(t_heap *heap, t_request request)
 	}
 }
 
-/*
-** return the coder id of the top request in the heap
-*/
+
 int	top_request(t_heap *heap)
 {
 	if (heap->size == 0)
@@ -65,10 +61,7 @@ int	top_request(t_heap *heap)
 	return (heap->items[0].id);
 }
 
-/*
-** pop the first request from the heap
-** we decrease the size so what is beyond it does not count anymore
-*/
+
 void	heap_pop_first(t_heap *heap)
 {
 	if (heap->size == 0)

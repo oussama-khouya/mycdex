@@ -20,10 +20,8 @@
 # include <sys/time.h>
 # include <string.h>
 
-/* Forward declaration of shared data struct */
 typedef struct s_data	t_data;
 
-/* coder struct */
 typedef struct s_coder
 {
 	int				finished;
@@ -36,7 +34,6 @@ typedef struct s_coder
 	t_data			*data;
 }	t_coder;
 
-/* define policies */
 # define FIFO 0
 # define EDF 1
 
@@ -98,7 +95,7 @@ void	remove_request(t_heap *heap, int id);
 void	*coder_routine(void *arg);
 
 int		take_dongles(t_coder *coder);
-void	realease_dongles(t_coder *coder);
+void	release_dongles(t_coder *coder);
 void	*monitor(void *arg);
 
 long	get_time_ms(void);

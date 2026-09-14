@@ -1,0 +1,264 @@
+==772894== Memcheck, a memory error detector
+==772894== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==772894== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==772894== Command: ./codexion 5 2000 200 200 200 10 0 fifo
+==772894== 
+109 1 has taken a dongle
+116 1 has taken a dongle
+116 1 is compiling
+118 3 has taken a dongle
+118 3 has taken a dongle
+118 3 is compiling
+319 5 has taken a dongle
+319 5 has taken a dongle
+319 5 is compiling
+319 3 is debugging
+319 1 is debugging
+320 2 has taken a dongle
+320 2 has taken a dongle
+320 2 is compiling
+519 1 is refactoring
+519 3 is refactoring
+519 5 is debugging
+519 4 has taken a dongle
+519 4 has taken a dongle
+519 4 is compiling
+520 2 is debugging
+719 1 has taken a dongle
+719 1 has taken a dongle
+719 1 is compiling
+719 4 is debugging
+719 3 has taken a dongle
+719 3 has taken a dongle
+719 3 is compiling
+719 5 is refactoring
+720 2 is refactoring
+919 1 is debugging
+919 4 is refactoring
+919 3 is debugging
+919 5 has taken a dongle
+919 5 has taken a dongle
+919 5 is compiling
+920 2 has taken a dongle
+920 2 has taken a dongle
+920 2 is compiling
+1119 1 is refactoring
+1119 5 is debugging
+1119 4 has taken a dongle
+1119 4 has taken a dongle
+1119 4 is compiling
+1119 3 is refactoring
+1120 2 is debugging
+1319 1 has taken a dongle
+1319 1 has taken a dongle
+1319 1 is compiling
+1319 5 is refactoring
+1319 4 is debugging
+1319 3 has taken a dongle
+1319 3 has taken a dongle
+1319 3 is compiling
+1320 2 is refactoring
+1519 4 is refactoring
+1519 3 is debugging
+1519 1 is debugging
+1519 5 has taken a dongle
+1519 5 has taken a dongle
+1519 5 is compiling
+1520 2 has taken a dongle
+1520 2 has taken a dongle
+1520 2 is compiling
+1719 3 is refactoring
+1719 5 is debugging
+1719 1 is refactoring
+1719 4 has taken a dongle
+1719 4 has taken a dongle
+1719 4 is compiling
+1720 2 is debugging
+1919 5 is refactoring
+1919 1 has taken a dongle
+1919 1 has taken a dongle
+1919 1 is compiling
+1919 4 is debugging
+1919 3 has taken a dongle
+1919 3 has taken a dongle
+1919 3 is compiling
+1920 2 is refactoring
+2119 4 is refactoring
+2119 3 is debugging
+2119 1 is debugging
+2119 5 has taken a dongle
+2119 5 has taken a dongle
+2119 5 is compiling
+2120 2 has taken a dongle
+2120 2 has taken a dongle
+2120 2 is compiling
+2319 1 is refactoring
+2319 5 is debugging
+2319 4 has taken a dongle
+2319 4 has taken a dongle
+2319 4 is compiling
+2319 3 is refactoring
+2320 2 is debugging
+2519 5 is refactoring
+2519 1 has taken a dongle
+2519 1 has taken a dongle
+2519 1 is compiling
+2519 4 is debugging
+2519 3 has taken a dongle
+2519 3 has taken a dongle
+2519 3 is compiling
+2520 2 is refactoring
+2719 4 is refactoring
+2719 3 is debugging
+2719 1 is debugging
+2719 5 has taken a dongle
+2719 5 has taken a dongle
+2719 5 is compiling
+2720 2 has taken a dongle
+2720 2 has taken a dongle
+2720 2 is compiling
+2919 3 is refactoring
+2919 1 is refactoring
+2919 5 is debugging
+2919 4 has taken a dongle
+2919 4 has taken a dongle
+2919 4 is compiling
+2920 2 is debugging
+3119 4 is debugging
+3119 3 has taken a dongle
+3119 3 has taken a dongle
+3119 3 is compiling
+3119 5 is refactoring
+3119 1 has taken a dongle
+3119 1 has taken a dongle
+3119 1 is compiling
+3120 2 is refactoring
+3319 3 is debugging
+3319 1 is debugging
+3319 5 has taken a dongle
+3319 5 has taken a dongle
+3319 5 is compiling
+3319 4 is refactoring
+3320 2 has taken a dongle
+3320 2 has taken a dongle
+3320 2 is compiling
+3519 1 is refactoring
+3519 3 is refactoring
+3519 5 is debugging
+3519 4 has taken a dongle
+3519 4 has taken a dongle
+3519 4 is compiling
+3520 2 is debugging
+3719 4 is debugging
+3719 5 is refactoring
+3719 3 has taken a dongle
+3719 3 has taken a dongle
+3719 3 is compiling
+3719 1 has taken a dongle
+3719 1 has taken a dongle
+3719 1 is compiling
+3720 2 is refactoring
+3919 4 is refactoring
+3919 1 is debugging
+3919 5 has taken a dongle
+3919 5 has taken a dongle
+3919 5 is compiling
+3919 3 is debugging
+3920 2 has taken a dongle
+3920 2 has taken a dongle
+3920 2 is compiling
+4119 3 is refactoring
+4119 1 is refactoring
+4119 5 is debugging
+4119 4 has taken a dongle
+4119 4 has taken a dongle
+4119 4 is compiling
+4120 2 is debugging
+4319 5 is refactoring
+4319 1 has taken a dongle
+4319 1 has taken a dongle
+4319 1 is compiling
+4319 4 is debugging
+4319 3 has taken a dongle
+4319 3 has taken a dongle
+4319 3 is compiling
+4320 2 is refactoring
+4519 4 is refactoring
+4519 3 is debugging
+4521 1 is debugging
+4521 5 has taken a dongle
+4521 5 has taken a dongle
+4521 5 is compiling
+4521 2 has taken a dongle
+4521 2 has taken a dongle
+4521 2 is compiling
+4721 1 is refactoring
+4721 2 is debugging
+4721 3 is refactoring
+4721 5 is debugging
+4721 4 has taken a dongle
+4721 4 has taken a dongle
+4721 4 is compiling
+4921 2 is refactoring
+4921 5 is refactoring
+4921 1 has taken a dongle
+4921 1 has taken a dongle
+4921 1 is compiling
+4921 4 is debugging
+4921 3 has taken a dongle
+4921 3 has taken a dongle
+4921 3 is compiling
+5121 3 is debugging
+5121 4 is refactoring
+5121 5 has taken a dongle
+5121 5 has taken a dongle
+5121 5 is compiling
+5121 1 is debugging
+5121 2 has taken a dongle
+5121 2 has taken a dongle
+5121 2 is compiling
+5321 3 is refactoring
+5321 5 is debugging
+5321 1 is refactoring
+5321 2 is debugging
+5321 4 has taken a dongle
+5321 4 has taken a dongle
+5321 4 is compiling
+5521 1 has taken a dongle
+5521 1 has taken a dongle
+5521 1 is compiling
+5521 2 is refactoring
+5521 5 is refactoring
+5521 4 is debugging
+5521 3 has taken a dongle
+5521 3 has taken a dongle
+5521 3 is compiling
+5721 1 is debugging
+5721 5 has taken a dongle
+5721 5 has taken a dongle
+5721 5 is compiling
+5721 4 is refactoring
+5721 2 has taken a dongle
+5721 2 has taken a dongle
+5721 2 is compiling
+5721 3 is debugging
+5921 3 is refactoring
+5921 1 is refactoring
+5921 5 is debugging
+5921 2 is debugging
+5921 4 has taken a dongle
+5921 4 has taken a dongle
+5921 4 is compiling
+6121 5 is refactoring
+6121 2 is refactoring
+6121 4 is debugging
+6321 4 is refactoring
+==772894== 
+==772894== HEAP SUMMARY:
+==772894==     in use at exit: 0 bytes in 0 blocks
+==772894==   total heap usage: 14 allocs, 14 frees, 6,848 bytes allocated
+==772894== 
+==772894== All heap blocks were freed -- no leaks are possible
+==772894== 
+==772894== For lists of detected and suppressed errors, rerun with: -s
+==772894== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

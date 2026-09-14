@@ -12,10 +12,7 @@
 
 #include "codexion.h"
 
-/*
-** compile phase:
-** it print status and sleeps for the compiling time
-*/
+
 static void	compile(t_coder *coder)
 {
 	t_data	*data;
@@ -28,9 +25,7 @@ static void	compile(t_coder *coder)
 	pthread_mutex_unlock(&data->state_mutex);
 }
 
-/*
-** debug phase
-*/
+
 static void	debug(t_coder *coder)
 {
 	t_data	*data;
@@ -40,9 +35,7 @@ static void	debug(t_coder *coder)
 	sleep_for_ms(data->debug_time, data);
 }
 
-/*
-** refactor phase
-*/
+
 static void	refactor(t_coder *coder)
 {
 	t_data	*data;
@@ -53,13 +46,11 @@ static void	refactor(t_coder *coder)
 }
 
 /*
-** Added: check if coder finished its compiling cycle with mutex protection.
-** Made static, added state_mutex to prevent data race, and handle >= required.
+check if coder finished its compiling cycle 
 */
 static int	coder_is_finished(t_coder *coder)
 {
-	if (coder->data->required > 0
-		&& coder->compile_count >= coder->data->required)
+	if (coder->compile_count >= coder->data->required)
 	{
 		pthread_mutex_lock(&coder->data->state_mutex);
 		coder->finished = 1;
@@ -70,19 +61,14 @@ static int	coder_is_finished(t_coder *coder)
 }
 
 /*
-** this is the function that will be executed for every coder thread
-** running while not stopped:
-** - the coder takes two dongles
-** - update last_compile time
-** - compile
-** - release the dongles
-** - check if stopped, debug and refactor
+this is the function that will be executed for every coder thread
 */
 void	*coder_routine(void *arg)
 {
 	t_coder	*coder;
 
 	coder = (t_coder *)arg;
+	
 	while (!is_stopped(coder->data))
 	{
 		if (!take_dongles(coder))
@@ -91,7 +77,7 @@ void	*coder_routine(void *arg)
 		coder->last_compile = get_time_ms();
 		pthread_mutex_unlock(&coder->data->state_mutex);
 		compile(coder);
-		realease_dongles(coder);
+		release_dongles(coder);
 		if (is_stopped(coder->data))
 			break ;
 		debug(coder);
@@ -99,8 +85,7 @@ void	*coder_routine(void *arg)
 			break ;
 		refactor(coder);
 		/*
-		** Added: check if coder finished its compiling cycle.
-		** Formatted comment to standard 42 style and break with space.
+		check if coder finished its compiling cycle.
 		*/
 		if (coder_is_finished(coder))
 			break ;

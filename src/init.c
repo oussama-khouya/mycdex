@@ -26,7 +26,7 @@ static int	parse_args(t_data *data, int ac, char **av)
 	data->refactor_time = my_atoi(av[5]);
 	data->required = my_atoi(av[6]);
 	data->cooldown = my_atoi(av[7]);
-	if (data->coders_count <= 0 || data->burnout <= 0
+	if (data->coders_count <= 0 || data->burnout < 0
 		|| data->compile_time < 0 || data->debug_time < 0
 		|| data->refactor_time < 0 || data->required < 0
 		|| data->cooldown < 0)
@@ -65,8 +65,6 @@ static void	init_dongles(t_data *data)
 
 /*
 ** initialize the coders
-** its id - 1, left = i
-** right = (i + 1) % coders_count
 */
 static void	init_coders(t_data *data)
 {
@@ -87,7 +85,6 @@ static void	init_coders(t_data *data)
 }
 
 /*
-** the main function that init the data
 ** allocate the arr of dongles and coders and fill them
 */
 int	init_data(t_data *data, int ac, char **av)

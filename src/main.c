@@ -12,11 +12,8 @@
 
 #include "codexion.h"
 
-/*
-** Start coder and monitor threads
-** (Extracted as helper to keep main concise and clean)
-*/
-static void	start_coders(t_data *data)
+
+static void	start_threads(t_data *data)
 {
 	int	i;
 
@@ -30,11 +27,7 @@ static void	start_coders(t_data *data)
 	pthread_create(&data->monitor_thread, NULL, monitor, data);
 }
 
-/*
-** Join monitor and coder threads
-** - join the monitor thread
-** - join coders threads
-*/
+
 static void	join_threads(t_data *data)
 {
 	int	i;
@@ -48,13 +41,6 @@ static void	join_threads(t_data *data)
 	}
 }
 
-/*
-** Main function:
-** - memset the data memory
-** - create coders thread
-** - create the monitor threads
-** - clean up
-*/
 int	main(int ac, char **av)
 {
 	t_data	data;
@@ -65,16 +51,8 @@ int	main(int ac, char **av)
 		write(2, "Error: Invalid arguments\n", 25);
 		return (1);
 	}
-	/*
-	** Added: If required compilations is 0, every coder already completed >= 0 times.
-	** Simulation stops immediately without compiling (mandated by subject/scale).
-	*/
-	if (data.required == 0)
-	{
-		cleanup(&data);
-		return (0);
-	}
-	start_coders(&data);
+
+	start_threads(&data);
 	join_threads(&data);
 	cleanup(&data);
 	return (0);
